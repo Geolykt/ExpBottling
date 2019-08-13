@@ -1,0 +1,8 @@
+{
+    "variants": {
+        "facing=north": { "model": "exp_bottling:block/exp_bottling_machine" },
+        "facing=south": { "model": "exp_bottling:block/exp_bottling_machine", "y": 180 },
+        "facing=west":  { "model": "exp_bottling:block/exp_bottling_machine", "y": 270 },
+        "facing=east":  { "model": "exp_bottling:block/exp_bottling_machine", "y": 90 }
+    }
+}

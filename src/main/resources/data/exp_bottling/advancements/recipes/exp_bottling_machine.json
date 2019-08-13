@@ -1,0 +1,16 @@
+{
+  "parent": "exp_bottling:recipes/root",
+  "rewards": {
+    "recipes": [
+      "exp_bottling:exp_bottling_machine"
+    ]
+  },
+  "criteria": {
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "minecraft:crafting_table"
+      }
+    }
+  }
+}
