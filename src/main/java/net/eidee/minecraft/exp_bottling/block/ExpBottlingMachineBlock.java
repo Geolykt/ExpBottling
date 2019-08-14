@@ -24,101 +24,183 @@
 
 package net.eidee.minecraft.exp_bottling.block;
 
+import static net.eidee.minecraft.exp_bottling.gui.GuiHandler.GUI_EXP_BOTTLING_MACHINE;
+
+import java.util.Random;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import mcp.MethodsReturnNonnullByDefault;
+import net.eidee.minecraft.exp_bottling.ExpBottling;
 import net.eidee.minecraft.exp_bottling.tileentity.ExpBottlingMachineTileEntity;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.state.DirectionProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.state.properties.BlockStateProperties;
+import net.minecraft.block.BlockContainer;
+import net.minecraft.block.BlockHorizontal;
+import net.minecraft.block.SoundType;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.PropertyDirection;
+import net.minecraft.block.state.BlockStateContainer;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockRenderLayer;
-import net.minecraft.util.Hand;
+import net.minecraft.util.EnumBlockRenderType;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.Mirror;
+import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.World;
-import net.minecraftforge.common.extensions.IForgeBlock;
-import net.minecraftforge.fml.network.NetworkHooks;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class ExpBottlingMachineBlock
-    extends Block
-    implements IForgeBlock
+    extends BlockContainer
 {
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final PropertyDirection FACING = BlockHorizontal.FACING;
 
-    public ExpBottlingMachineBlock( Properties properties )
+    public ExpBottlingMachineBlock()
     {
-        super( properties );
-    }
-
-    @Override
-    protected void fillStateContainer( StateContainer.Builder< Block, BlockState > builder )
-    {
-        builder.add( FACING );
-    }
-
-    @Override
-    public BlockRenderType getRenderType( BlockState state )
-    {
-        return BlockRenderType.MODEL;
-    }
-
-    @Override
-    public BlockRenderLayer getRenderLayer()
-    {
-        return BlockRenderLayer.CUTOUT;
-    }
-
-    @Override
-    public BlockState getStateForPlacement( BlockItemUseContext context )
-    {
-        return getDefaultState().with( FACING, context.getPlacementHorizontalFacing().getOpposite() );
-    }
-
-    @Override
-    public boolean hasTileEntity( BlockState state )
-    {
-        return true;
+        super( Material.IRON );
+        setHardness( 3.0F );
+        setResistance( 10.0F );
+        setSoundType( SoundType.METAL );
+        setDefaultState( blockState.getBaseState().withProperty( FACING, EnumFacing.NORTH ) );
     }
 
     @Nullable
     @Override
-    public TileEntity createTileEntity( BlockState state, IBlockReader world )
+    public TileEntity createNewTileEntity( World worldIn, int meta )
     {
         return new ExpBottlingMachineTileEntity();
     }
 
     @Override
-    public boolean onBlockActivated( BlockState state,
-                                     World worldIn,
-                                     BlockPos pos,
-                                     PlayerEntity player,
-                                     Hand handIn,
-                                     BlockRayTraceResult hit )
+    public Item getItemDropped( IBlockState state, Random rand, int fortune )
     {
-        if ( !worldIn.isRemote() )
+        return Item.getItemFromBlock( Blocks.EXP_BOTTLING_MACHINE );
+    }
+
+    @Override
+    public boolean onBlockActivated( World worldIn,
+                                     BlockPos pos,
+                                     IBlockState state,
+                                     EntityPlayer playerIn,
+                                     EnumHand hand,
+                                     EnumFacing facing,
+                                     float hitX,
+                                     float hitY,
+                                     float hitZ )
+    {
+        if ( !worldIn.isRemote )
         {
             TileEntity tileEntity = worldIn.getTileEntity( pos );
             if ( tileEntity instanceof ExpBottlingMachineTileEntity )
             {
-                ExpBottlingMachineTileEntity bottlingMachine = ( ExpBottlingMachineTileEntity )tileEntity;
-                if ( player instanceof ServerPlayerEntity )
+                if ( playerIn instanceof EntityPlayerMP )
                 {
-                    NetworkHooks.openGui( ( ServerPlayerEntity )player, bottlingMachine );
+                    playerIn.openGui( ExpBottling.INSTANCE,
+                                      GUI_EXP_BOTTLING_MACHINE,
+                                      worldIn,
+                                      pos.getX(),
+                                      pos.getY(),
+                                      pos.getZ() );
                 }
             }
         }
         return true;
+    }
+
+    @Override
+    public IBlockState getStateForPlacement( World world,
+                                             BlockPos pos,
+                                             EnumFacing facing,
+                                             float hitX,
+                                             float hitY,
+                                             float hitZ,
+                                             int meta,
+                                             EntityLivingBase placer,
+                                             EnumHand hand )
+    {
+        return getDefaultState().withProperty( FACING, placer.getHorizontalFacing().getOpposite() );
+    }
+
+    @Override
+    public void onBlockPlacedBy( World worldIn,
+                                 BlockPos pos,
+                                 IBlockState state,
+                                 EntityLivingBase placer,
+                                 ItemStack stack )
+    {
+        worldIn.setBlockState( pos, state.withProperty( FACING, placer.getHorizontalFacing().getOpposite() ), 2 );
+    }
+
+    @Override
+    public ItemStack getPickBlock( IBlockState state,
+                                   RayTraceResult target,
+                                   World world,
+                                   BlockPos pos,
+                                   EntityPlayer player )
+    {
+        return new ItemStack( Blocks.EXP_BOTTLING_MACHINE );
+    }
+
+    public boolean isOpaqueCube(IBlockState state)
+    {
+        return false;
+    }
+
+    @Override
+    public EnumBlockRenderType getRenderType( IBlockState state )
+    {
+        return EnumBlockRenderType.MODEL;
+    }
+
+    @Override
+    public BlockRenderLayer getBlockLayer()
+    {
+        return BlockRenderLayer.CUTOUT;
+    }
+
+    @Override
+    public IBlockState getStateFromMeta( int meta )
+    {
+        EnumFacing enumfacing = EnumFacing.getFront( meta );
+
+        if ( enumfacing.getAxis() == EnumFacing.Axis.Y )
+        {
+            enumfacing = EnumFacing.NORTH;
+        }
+
+        return this.getDefaultState().withProperty( FACING, enumfacing );
+    }
+
+    @Override
+    public int getMetaFromState( IBlockState state )
+    {
+        return state.getValue( FACING ).getIndex();
+    }
+
+    @Override
+    public IBlockState withRotation( IBlockState state, Rotation rot )
+    {
+        return state.withProperty( FACING, rot.rotate( state.getValue( FACING ) ) );
+    }
+
+    @Override
+    public IBlockState withMirror( IBlockState state, Mirror mirrorIn )
+    {
+        return state.withRotation( mirrorIn.toRotation( state.getValue( FACING ) ) );
+    }
+
+    @Override
+    protected BlockStateContainer createBlockState()
+    {
+        return new BlockStateContainer( this, FACING );
     }
 }

@@ -22,19 +22,17 @@
  * SOFTWARE.
  */
 
-package net.eidee.minecraft.exp_bottling.tileentity;
+package net.eidee.minecraft.exp_bottling.registry;
 
-import net.eidee.minecraft.exp_bottling.constants.Names;
+import net.eidee.minecraft.exp_bottling.ExpBottling;
+import net.eidee.minecraft.exp_bottling.gui.GuiHandler;
 
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraftforge.registries.ObjectHolder;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
 
-public class TileEntityTypes
+public class GuiHandlerRegistry
 {
-    private TileEntityTypes()
+    public static void register()
     {
+        NetworkRegistry.INSTANCE.registerGuiHandler( ExpBottling.INSTANCE, new GuiHandler() );
     }
-
-    @ObjectHolder( Names.EXP_BOTTLING_MACHINE )
-    public static TileEntityType< ExpBottlingMachineTileEntity > EXP_BOTTLING_MACHINE;
 }

@@ -1,0 +1,16 @@
+[
+{
+  "modid": "exp_bottling",
+  "name": "EXP Bottling",
+  "description": "Add a block that can be used to make bottled EXP.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "https://github.com/eideehi/ExpBottling",
+  "updateUrl": "https://raw.githubusercontent.com/eideehi/ExpBottling/master/update.json",
+  "authorList": ["EideeHi"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

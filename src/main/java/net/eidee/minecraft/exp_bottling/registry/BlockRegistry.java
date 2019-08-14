@@ -30,16 +30,20 @@ import net.eidee.minecraft.exp_bottling.block.ExpBottlingMachineBlock;
 import net.eidee.minecraft.exp_bottling.constants.Names;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
-import net.minecraft.item.BlockItem;
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemBlock;
+import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.registries.IForgeRegistry;
 
-@Mod.EventBusSubscriber( modid = ExpBottling.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD )
+@Mod.EventBusSubscriber( modid = ExpBottling.MOD_ID )
 public class BlockRegistry
 {
     @SubscribeEvent
@@ -48,11 +52,10 @@ public class BlockRegistry
         IForgeRegistry< Block > registry = event.getRegistry();
 
         Block block;
-        Block.Properties prop;
         {
-            prop = Block.Properties.create( Material.IRON )
-                                   .hardnessAndResistance( 3.0F );
-            block = new ExpBottlingMachineBlock( prop ).setRegistryName( Names.EXP_BOTTLING_MACHINE );
+            block = new ExpBottlingMachineBlock().setUnlocalizedName( Names.EXP_BOTTLING_MACHINE.replace( ':', '.' ) )
+                                                 .setRegistryName( Names.EXP_BOTTLING_MACHINE )
+                                                 .setCreativeTab( CreativeTabs.DECORATIONS );
             registry.register( block );
         }
     }
@@ -63,12 +66,18 @@ public class BlockRegistry
         IForgeRegistry< Item > registry = event.getRegistry();
 
         Item item;
-        Item.Properties prop;
         {
-            prop = new Item.Properties().group( ItemGroup.DECORATIONS );
-
-            item = new BlockItem( Blocks.EXP_BOTTLING_MACHINE, prop ).setRegistryName( Names.EXP_BOTTLING_MACHINE );
+            item = new ItemBlock( Blocks.EXP_BOTTLING_MACHINE ).setRegistryName( Names.EXP_BOTTLING_MACHINE );
             registry.register( item );
         }
+    }
+
+    @SubscribeEvent
+    @SideOnly( Side.CLIENT )
+    public static void modelRegister( ModelRegistryEvent event )
+    {
+        Item item = Item.getItemFromBlock( Blocks.EXP_BOTTLING_MACHINE );
+        ModelResourceLocation key = new ModelResourceLocation( Names.EXP_BOTTLING_MACHINE, "inventory" );
+        ModelLoader.setCustomModelResourceLocation( item, 0, key );
     }
 }

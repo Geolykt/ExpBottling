@@ -24,46 +24,15 @@
 
 package net.eidee.minecraft.exp_bottling.tileentity;
 
-import java.util.Objects;
-import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import mcp.MethodsReturnNonnullByDefault;
-import net.eidee.minecraft.exp_bottling.inventory.container.ExpBottlingMachineContainer;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.IWorldPosCallable;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class ExpBottlingMachineTileEntity
     extends TileEntity
-    implements INamedContainerProvider
 {
-    public ExpBottlingMachineTileEntity()
-    {
-        super( TileEntityTypes.EXP_BOTTLING_MACHINE );
-    }
-
-    @Override
-    public ITextComponent getDisplayName()
-    {
-        return new TranslationTextComponent( "container.exp_bottling.exp_bottling_machine" );
-    }
-
-    @Nullable
-    @Override
-    public Container createMenu( int id, PlayerInventory playerInventory, PlayerEntity player )
-    {
-        World world = Objects.requireNonNull( getWorld() );
-        IWorldPosCallable worldPosCallable = IWorldPosCallable.of( world, getPos() );
-        return new ExpBottlingMachineContainer( id, playerInventory, worldPosCallable );
-    }
 }

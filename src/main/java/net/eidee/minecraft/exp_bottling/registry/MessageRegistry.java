@@ -29,18 +29,20 @@ import net.eidee.minecraft.exp_bottling.network.message.gui.SetBottlingExp;
 import net.eidee.minecraft.exp_bottling.network.message.gui.TakeBottledExp;
 import net.eidee.minecraft.exp_bottling.network.message.gui.handler.BottlingExpMessageHandler;
 
+import net.minecraftforge.fml.relauncher.Side;
+
 public class MessageRegistry
 {
     public static void register()
     {
         int id = 0;
-        Networks.EXP_BOTTLING.registerMessage( id++, SetBottlingExp.class,
-                                               SetBottlingExp::encode,
-                                               SetBottlingExp::decode,
-                                               BottlingExpMessageHandler::setBottlingExp );
-        Networks.EXP_BOTTLING.registerMessage( id++, TakeBottledExp.class,
-                                               TakeBottledExp::encode,
-                                               TakeBottledExp::decode,
-                                               BottlingExpMessageHandler::takeBottledExp );
+        Networks.EXP_BOTTLING.registerMessage( BottlingExpMessageHandler.SetBottlingExpHandler.class,
+                                               SetBottlingExp.class,
+                                               id++,
+                                               Side.SERVER );
+        Networks.EXP_BOTTLING.registerMessage( BottlingExpMessageHandler.TakeBottledExpExpHandler.class,
+                                               TakeBottledExp.class,
+                                               id++,
+                                               Side.SERVER );
     }
 }

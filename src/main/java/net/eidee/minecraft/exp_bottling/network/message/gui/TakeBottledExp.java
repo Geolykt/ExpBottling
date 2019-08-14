@@ -24,13 +24,20 @@
 
 package net.eidee.minecraft.exp_bottling.network.message.gui;
 
-import net.minecraft.inventory.container.ClickType;
-import net.minecraft.network.PacketBuffer;
+import io.netty.buffer.ByteBuf;
+
+import net.minecraft.inventory.ClickType;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 
 public class TakeBottledExp
+    implements IMessage
 {
     private int dragType;
     private int clickType;
+
+    public TakeBottledExp()
+    {
+    }
 
     public TakeBottledExp( int dragType, int clickType )
     {
@@ -53,14 +60,17 @@ public class TakeBottledExp
         return clickType == 0 ? ClickType.PICKUP : ClickType.QUICK_MOVE;
     }
 
-    public static void encode( TakeBottledExp message, PacketBuffer buffer )
+    @Override
+    public void fromBytes( ByteBuf buf )
     {
-        buffer.writeInt( message.dragType );
-        buffer.writeByte( message.clickType );
+        dragType = buf.readInt();
+        clickType = buf.readByte();
     }
 
-    public static TakeBottledExp decode( PacketBuffer buffer )
+    @Override
+    public void toBytes( ByteBuf buf )
     {
-        return new TakeBottledExp( buffer.readInt(), buffer.readByte() );
+        buf.writeInt( dragType );
+        buf.writeByte( clickType );
     }
 }

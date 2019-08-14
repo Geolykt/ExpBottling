@@ -24,41 +24,46 @@
 
 package net.eidee.minecraft.exp_bottling.network.message.gui.handler;
 
-import java.util.function.Supplier;
 
 import net.eidee.minecraft.exp_bottling.inventory.container.ExpBottlingMachineContainer;
 import net.eidee.minecraft.exp_bottling.network.message.gui.SetBottlingExp;
 import net.eidee.minecraft.exp_bottling.network.message.gui.TakeBottledExp;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
+import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
+import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 
 public class BottlingExpMessageHandler
 {
-    public static void setBottlingExp( SetBottlingExp message, Supplier< NetworkEvent.Context > ctx )
+    public static class SetBottlingExpHandler
+        implements IMessageHandler< SetBottlingExp, IMessage >
     {
-        NetworkEvent.Context _ctx = ctx.get();
-        _ctx.enqueueWork( () -> {
-            ServerPlayerEntity player = _ctx.getSender();
+        @Override
+        public IMessage onMessage( SetBottlingExp message, MessageContext ctx )
+        {
+            EntityPlayerMP player = ctx.getServerHandler().player;
             if ( player != null && player.openContainer instanceof ExpBottlingMachineContainer )
             {
                 ( ( ExpBottlingMachineContainer )player.openContainer ).setBottlingExp( message.getExpValue() );
             }
-        } );
-        _ctx.setPacketHandled( true );
+            return null;
+        }
     }
 
-    public static void takeBottledExp( TakeBottledExp message, Supplier< NetworkEvent.Context > ctx )
+    public static class TakeBottledExpExpHandler
+        implements IMessageHandler< TakeBottledExp, IMessage >
     {
-        NetworkEvent.Context _ctx = ctx.get();
-        _ctx.enqueueWork( () -> {
-            ServerPlayerEntity player = _ctx.getSender();
+        @Override
+        public IMessage onMessage( TakeBottledExp message, MessageContext ctx )
+        {
+            EntityPlayerMP player = ctx.getServerHandler().player;
             if ( player != null && player.openContainer instanceof ExpBottlingMachineContainer )
             {
                 ExpBottlingMachineContainer openContainer = ( ExpBottlingMachineContainer )player.openContainer;
                 openContainer.takeBottledExp( message.getDragType(), message.getClickType(), player );
             }
-        } );
-        _ctx.setPacketHandled( true );
+            return null;
+        }
     }
 }

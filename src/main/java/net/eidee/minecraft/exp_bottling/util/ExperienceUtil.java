@@ -26,7 +26,7 @@ package net.eidee.minecraft.exp_bottling.util;
 
 import java.util.stream.IntStream;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.EntityPlayer;
 
 public class ExperienceUtil
 {
@@ -65,12 +65,12 @@ public class ExperienceUtil
         return sum + ( int )Math.floor( expBarCap( level ) * expBar );
     }
 
-    public static int getPlayerExp( PlayerEntity player )
+    public static int getPlayerExp( EntityPlayer player )
     {
         return levelToExp( player.experienceLevel, player.experience );
     }
 
-    public static void addExpToPlayer( PlayerEntity player, int value )
+    public static void addExpToPlayer( EntityPlayer player, int value )
     {
         player.addScore( value );
 
@@ -87,7 +87,7 @@ public class ExperienceUtil
     }
 
 
-    public static void removeExpFromPlayer( PlayerEntity player, int value )
+    public static void removeExpFromPlayer( EntityPlayer player, int value )
     {
         int exp = getPlayerExp( player );
 

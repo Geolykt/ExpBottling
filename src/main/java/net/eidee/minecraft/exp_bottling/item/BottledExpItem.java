@@ -31,24 +31,26 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import mcp.MethodsReturnNonnullByDefault;
+import net.eidee.minecraft.exp_bottling.util.ExperienceUtil;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Items;
+import net.minecraft.item.EnumAction;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.UseAction;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.stats.Stats;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.stats.StatList;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
@@ -57,64 +59,66 @@ public class BottledExpItem
 {
     private static final String TAG_EXPERIENCE = ( MOD_ID + ":Exp" );
 
-    public BottledExpItem( Properties properties )
-    {
-        super( properties );
-    }
-
     public static void setTagExperience( ItemStack stack, int expValue )
     {
-        stack.getOrCreateTag().putInt( TAG_EXPERIENCE, expValue );
+        NBTTagCompound tagCompound = stack.getTagCompound();
+        if ( tagCompound == null )
+        {
+            tagCompound = new NBTTagCompound();
+            stack.setTagCompound( tagCompound );
+        }
+        tagCompound.setInteger( TAG_EXPERIENCE, expValue );
     }
 
     public static int getTagExperience( ItemStack stack )
     {
-        CompoundNBT tag = stack.getTag();
+        NBTTagCompound tag = stack.getTagCompound();
         if ( tag != null )
         {
-            return tag.getInt( TAG_EXPERIENCE );
+            return tag.getInteger( TAG_EXPERIENCE );
         }
         return 0;
     }
 
     @Override
-    public ItemStack onItemUseFinish( ItemStack stack, World worldIn, LivingEntity entityLiving )
+    public ItemStack onItemUseFinish( ItemStack stack, World worldIn, EntityLivingBase entityLiving )
     {
-        PlayerEntity player = entityLiving instanceof PlayerEntity ? ( PlayerEntity )entityLiving : null;
-        if ( player == null || !player.abilities.isCreativeMode )
+        EntityPlayer entityplayer = entityLiving instanceof EntityPlayer ? ( EntityPlayer )entityLiving : null;
+
+        if ( entityplayer == null || !entityplayer.capabilities.isCreativeMode )
         {
             stack.shrink( 1 );
         }
 
-        if ( player instanceof ServerPlayerEntity )
+        if ( entityplayer instanceof EntityPlayerMP )
         {
-            CriteriaTriggers.CONSUME_ITEM.trigger( ( ServerPlayerEntity )player, stack );
+            CriteriaTriggers.CONSUME_ITEM.trigger( ( EntityPlayerMP )entityplayer, stack );
         }
 
-        if ( !worldIn.isRemote && player != null )
+        if ( !worldIn.isRemote && entityplayer != null )
         {
             int exp = getTagExperience( stack );
             if ( exp > 0 )
             {
-                player.giveExperiencePoints( exp );
+                ExperienceUtil.addExpToPlayer( entityplayer, exp );
             }
         }
 
-        if ( player != null )
+        if ( entityplayer != null )
         {
-            player.addStat( Stats.ITEM_USED.get( this ) );
+            entityplayer.addStat( StatList.getObjectUseStats( this ) );
         }
 
-        if ( player == null || !player.abilities.isCreativeMode )
+        if ( entityplayer == null || !entityplayer.capabilities.isCreativeMode )
         {
             if ( stack.isEmpty() )
             {
-                return new ItemStack( net.minecraft.item.Items.GLASS_BOTTLE );
+                return new ItemStack( net.minecraft.init.Items.GLASS_BOTTLE );
             }
 
-            if ( player != null )
+            if ( entityplayer != null )
             {
-                player.inventory.addItemStackToInventory( new ItemStack( net.minecraft.item.Items.GLASS_BOTTLE ) );
+                entityplayer.inventory.addItemStackToInventory( new ItemStack( Items.GLASS_BOTTLE ) );
             }
         }
 
@@ -122,42 +126,40 @@ public class BottledExpItem
     }
 
     @Override
-    public int getUseDuration( ItemStack stack )
+    public int getMaxItemUseDuration( ItemStack stack )
     {
         return 32;
     }
 
     @Override
-    public UseAction getUseAction( ItemStack stack )
+    public EnumAction getItemUseAction( ItemStack stack )
     {
-        return UseAction.DRINK;
+        return EnumAction.DRINK;
     }
 
     @Override
-    public ActionResult< ItemStack > onItemRightClick( World worldIn, PlayerEntity playerIn, Hand handIn )
+    public ActionResult< ItemStack > onItemRightClick( World worldIn, EntityPlayer playerIn, EnumHand handIn )
     {
         playerIn.setActiveHand( handIn );
-        return new ActionResult<>( ActionResultType.SUCCESS, playerIn.getHeldItem( handIn ) );
+        return new ActionResult<>( EnumActionResult.SUCCESS, playerIn.getHeldItem( handIn ) );
     }
 
     @Override
-    public void addInformation( ItemStack stack,
-                                @Nullable World worldIn,
-                                List< ITextComponent > tooltip,
-                                ITooltipFlag flagIn )
+    @SideOnly( Side.CLIENT )
+    public void addInformation( ItemStack stack, @Nullable World worldIn, List< String > tooltip, ITooltipFlag flagIn )
     {
         if ( !stack.isEmpty() )
         {
             int exp = getTagExperience( stack );
             if ( exp > 0 )
             {
-                String msg = I18n.format( "item.exp_bottling.bottled_exp.tooltip.0", exp );
-                tooltip.add( new StringTextComponent( msg ) );
+                tooltip.add( I18n.format( "item.exp_bottling.bottled_exp.tooltip.0", exp ) );
             }
         }
     }
 
     @Override
+    @SideOnly( Side.CLIENT )
     public boolean hasEffect( ItemStack stack )
     {
         return true;

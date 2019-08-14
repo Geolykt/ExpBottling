@@ -26,31 +26,33 @@ package net.eidee.minecraft.exp_bottling;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import net.eidee.minecraft.exp_bottling.network.Networks;
-import net.eidee.minecraft.exp_bottling.registry.MessageRegistry;
-import net.eidee.minecraft.exp_bottling.registry.ScreenRegistry;
+import net.eidee.minecraft.exp_bottling.init.CommonProxy;
 
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
+import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
-@Mod( ExpBottling.MOD_ID )
+@Mod( modid = ExpBottling.MOD_ID, name = ExpBottling.NAME, version = ExpBottling.VERSION )
 public class ExpBottling
 {
     private static final Logger logger;
 
     public static final String MOD_ID = "exp_bottling";
+    public static final String NAME = "EXP Bottling";
+    public static final String VERSION = "1.12.2-1";
+
+    @Mod.Instance(MOD_ID)
+    public static ExpBottling INSTANCE;
+
+    @SidedProxy( modId = MOD_ID,
+                 clientSide = "net.eidee.minecraft.exp_bottling.init.ClientProxy",
+                 serverSide = "net.eidee.minecraft.exp_bottling.init.CommonProxy" )
+    public static CommonProxy proxy;
 
     static
     {
         logger = LogManager.getLogger( MOD_ID );
-    }
-
-    public ExpBottling()
-    {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener( this::setup );
-        FMLJavaModLoadingContext.get().getModEventBus().addListener( this::clientSetup );
     }
 
     public static Logger logger()
@@ -58,14 +60,15 @@ public class ExpBottling
         return logger;
     }
 
-    private void setup( FMLCommonSetupEvent event )
+    @Mod.EventHandler
+    private void preInit( FMLPreInitializationEvent event )
     {
-        Networks.init();
-        MessageRegistry.register();
+        proxy.preInit( event );
     }
 
-    private void clientSetup( FMLClientSetupEvent event )
+    @Mod.EventHandler
+    private void init( FMLInitializationEvent event )
     {
-        ScreenRegistry.register();
+        proxy.init( event );
     }
 }

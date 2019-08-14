@@ -25,13 +25,12 @@
 package net.eidee.minecraft.exp_bottling.gui;
 
 import static net.eidee.minecraft.exp_bottling.ExpBottling.MOD_ID;
-import static net.eidee.minecraft.exp_bottling.ExpBottling.logger;
 
+import java.io.IOException;
 import java.util.Map;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
-import com.mojang.blaze3d.platform.GlStateManager;
 import mcp.MethodsReturnNonnullByDefault;
 import net.eidee.minecraft.exp_bottling.inventory.container.ExpBottlingMachineContainer;
 import net.eidee.minecraft.exp_bottling.network.Networks;
@@ -39,31 +38,32 @@ import net.eidee.minecraft.exp_bottling.network.message.gui.SetBottlingExp;
 import net.eidee.minecraft.exp_bottling.network.message.gui.TakeBottledExp;
 import net.eidee.minecraft.exp_bottling.util.ExperienceUtil;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.client.renderer.entity.model.GenericHeadModel;
-import net.minecraft.client.renderer.entity.model.HumanoidHeadModel;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.model.ModelBase;
+import net.minecraft.client.model.ModelHumanoidHead;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.SkinManager;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.ClickType;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.IContainerListener;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.ClickType;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IContainerListener;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraftforge.fml.client.config.GuiButtonExt;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-@OnlyIn( Dist.CLIENT )
+@SideOnly( Side.CLIENT )
 public class ExpBottlingMachineScreen
-    extends ContainerScreen< ExpBottlingMachineContainer >
+    extends GuiContainer
     implements IContainerListener
 {
     private static final ResourceLocation GUI_TEXTURE;
@@ -73,51 +73,55 @@ public class ExpBottlingMachineScreen
         GUI_TEXTURE = new ResourceLocation( MOD_ID, "textures/gui/container/exp_bottling_machine.png" );
     }
 
+    private ExpBottlingMachineContainer container;
+    private InventoryPlayer inventoryPlayer;
+
+    private TextComponentTranslation title;
     private ResourceLocation playerSkin;
-    private GenericHeadModel head;
+    private ModelBase head;
     private String inputString1;
     private String inputString2;
     private int blinkCount;
     private int activeInput;
 
     public ExpBottlingMachineScreen( ExpBottlingMachineContainer screenContainer,
-                                     PlayerInventory inv,
-                                     ITextComponent titleIn )
+                                     InventoryPlayer inventoryPlayer )
     {
-        super( screenContainer, inv, titleIn );
+        super( screenContainer );
+        this.container = screenContainer;
+        this.inventoryPlayer = inventoryPlayer;
         xSize = 236;
         ySize = 204;
     }
 
     private ResourceLocation getPlayerSkin()
     {
-        Minecraft minecraft = getMinecraft();
-        SkinManager skinManager = minecraft.getSkinManager();
+        SkinManager skinManager = mc.getSkinManager();
         MinecraftProfileTexture.Type skinType = MinecraftProfileTexture.Type.SKIN;
         Map< MinecraftProfileTexture.Type, MinecraftProfileTexture > skins;
-        skins = skinManager.loadSkinFromCache( minecraft.player.getGameProfile() );
+        skins = skinManager.loadSkinFromCache( inventoryPlayer.player.getGameProfile() );
         return skins.containsKey( skinType ) ? skinManager.loadSkin( skins.get( skinType ), skinType )
-                                             : DefaultPlayerSkin.getDefaultSkin( minecraft.player.getUniqueID() );
+                                             : DefaultPlayerSkin.getDefaultSkin( inventoryPlayer.player.getUniqueID() );
     }
 
     private void drawString( String text, int x, int y, int color )
     {
-        font.drawString( text, x, y, color );
+        fontRenderer.drawString( text, x, y, color );
     }
 
     private void drawCenteredString( String text, int x, int y, int color )
     {
-        font.drawString( text, x - ( font.getStringWidth( text ) / 2.0F ), y, color );
+        fontRenderer.drawString( text, x - ( fontRenderer.getStringWidth( text ) / 2 ), y, color );
     }
 
     private void drawRightAlignedString( String text, int x, int y, int color )
     {
-        font.drawString( text, x - font.getStringWidth( text ), y, color );
+        fontRenderer.drawString( text, x - fontRenderer.getStringWidth( text ), y, color );
     }
 
     private int getVerticalCenter( int height )
     {
-        return ( height - font.FONT_HEIGHT ) / 2;
+        return ( height - fontRenderer.FONT_HEIGHT ) / 2;
     }
 
     private boolean isInBox( int x, int y, int xStart, int yStart, int xEnd, int yEnd )
@@ -127,23 +131,52 @@ public class ExpBottlingMachineScreen
 
     private void drawPlayerHead( int x, int y )
     {
-        getMinecraft().getTextureManager().bindTexture( playerSkin );
+        mc.getTextureManager().bindTexture( playerSkin );
         GlStateManager.pushMatrix();
         GlStateManager.disableCull();
-        GlStateManager.translatef( guiLeft + x + 8, guiTop + y + 16, 0.0F );
+        GlStateManager.translate( guiLeft + x + 8, guiTop + y + 16, 0.0F );
         GlStateManager.enableRescaleNormal();
-        GlStateManager.scalef( -32.0F, -32.0F, 32.0F );
-        GlStateManager.rotatef( 180.0F, 0.0F, 0.0F, 1.0F );
-        GlStateManager.rotatef( 180.0F, 0.0F, 1.0F, 0.0F );
-        GlStateManager.enableAlphaTest();
-        GlStateManager.setProfile( GlStateManager.Profile.PLAYER_SKIN );
-        head.func_217104_a( 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F );
+        GlStateManager.scale( -32.0F, -32.0F, 32.0F );
+        GlStateManager.rotate( 180.0F, 0.0F, 0.0F, 1.0F );
+        GlStateManager.rotate( 180.0F, 0.0F, 1.0F, 0.0F );
+        GlStateManager.enableAlpha();
+        GlStateManager.enableBlendProfile( GlStateManager.Profile.PLAYER_SKIN );
+        head.render( null, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F );
         GlStateManager.popMatrix();
     }
 
-    private void buttonHandle( Button button )
+    private void sendInputValues()
     {
-        String message = button.getMessage();
+        int value;
+        if ( inputString1.isEmpty() && inputString2.isEmpty() )
+        {
+            value = 0;
+        }
+        else if ( inputString1.isEmpty() )
+        {
+            EntityPlayer player = inventoryPlayer.player;
+            int playerExp = ExperienceUtil.getPlayerExp( player );
+            value = playerExp - Integer.parseInt( inputString2 );
+        }
+        else if ( inputString2.isEmpty() )
+        {
+            value = Integer.parseInt( inputString1 );
+        }
+        else
+        {
+            int before = Integer.parseInt( inputString1 );
+            int after = Integer.parseInt( inputString2 );
+            value = after - before;
+        }
+        container.setBottlingExp( value );
+        Networks.EXP_BOTTLING.sendToServer( new SetBottlingExp( value ) );
+    }
+
+    @Override
+    protected void actionPerformed( GuiButton button )
+        throws IOException
+    {
+        String message = button.displayString;
         switch ( message )
         {
             case "1":
@@ -205,40 +238,14 @@ public class ExpBottlingMachineScreen
         sendInputValues();
     }
 
-    private void sendInputValues()
-    {
-        int value;
-        if ( inputString1.isEmpty() && inputString2.isEmpty() )
-        {
-            value = 0;
-        }
-        else if ( inputString1.isEmpty() )
-        {
-            PlayerEntity player = playerInventory.player;
-            int playerExp = ExperienceUtil.getPlayerExp( player );
-            value = playerExp - Integer.parseInt( inputString2 );
-        }
-        else if ( inputString2.isEmpty() )
-        {
-            value = Integer.parseInt( inputString1 );
-        }
-        else
-        {
-            int before = Integer.parseInt( inputString1 );
-            int after = Integer.parseInt( inputString2 );
-            value = after - before;
-        }
-        container.setBottlingExp( value );
-        Networks.EXP_BOTTLING.sendToServer( new SetBottlingExp( value ) );
-    }
-
     @Override
-    protected void init()
+    public void initGui()
     {
-        super.init();
+        super.initGui();
 
+        title = new TextComponentTranslation( "container.exp_bottling.exp_bottling_machine" );
         playerSkin = getPlayerSkin();
-        head = new HumanoidHeadModel();
+        head = new ModelHumanoidHead();
         inputString1 = "";
         inputString2 = "";
 
@@ -252,30 +259,30 @@ public class ExpBottlingMachineScreen
         {
             int x = guiLeft + ( ( i % 3 ) * 21 );
             int y = guiTop + ( ( i / 3 ) * 21 );
-            addButton( new GuiButtonExt( 162 + x, 18 + y, 20, 20, buttonText[ i ], this::buttonHandle ) );
+            addButton( new GuiButtonExt( i, 162 + x, 18 + y, 20, 20, buttonText[ i ] ) );
         }
 
         container.addListener( this );
     }
 
     @Override
-    public void render( int p_render_1_, int p_render_2_, float p_render_3_ )
+    public void drawScreen( int mouseX, int mouseY, float partialTicks )
     {
-        this.renderBackground();
-        super.render( p_render_1_, p_render_2_, p_render_3_ );
-        this.renderHoveredToolTip( p_render_1_, p_render_2_ );
+        this.drawDefaultBackground();
+        super.drawScreen( mouseX, mouseY, partialTicks );
+        this.renderHoveredToolTip( mouseX, mouseY );
     }
 
     @Override
     protected void drawGuiContainerForegroundLayer( int mouseX, int mouseY )
     {
-        drawCenteredString( getTitle().getFormattedText(), 118, 6, 4210752 );
-        drawString( playerInventory.getDisplayName().getFormattedText(), 38, ySize - 91, 4210752 );
+        drawCenteredString( title.getFormattedText(), 118, 6, 4210752 );
+        drawString( inventoryPlayer.getDisplayName().getFormattedText(), 38, ySize - 91, 4210752 );
 
-        PlayerEntity player = playerInventory.player;
+        EntityPlayer player = inventoryPlayer.player;
         int playerExp = ExperienceUtil.getPlayerExp( player );
         String exp = Integer.toString( playerExp );
-        drawRightAlignedString( exp, 136 - font.getStringWidth( "_" ), 28 + getVerticalCenter( 14 ), 0xFFFFFF );
+        drawRightAlignedString( exp, 136 - fontRenderer.getStringWidth( "_" ), 28 + getVerticalCenter( 14 ), 0xFFFFFF );
 
         String input = inputString1;
         int margin = 0;
@@ -288,12 +295,12 @@ public class ExpBottlingMachineScreen
             }
             else
             {
-                margin = font.getStringWidth( "_" );
+                margin = fontRenderer.getStringWidth( "_" );
             }
         }
         else
         {
-            margin = font.getStringWidth( "_" );
+            margin = fontRenderer.getStringWidth( "_" );
 
             if ( inputString1.isEmpty() && !inputString2.isEmpty() )
             {
@@ -315,12 +322,12 @@ public class ExpBottlingMachineScreen
             }
             else
             {
-                margin = font.getStringWidth( "_" );
+                margin = fontRenderer.getStringWidth( "_" );
             }
         }
         else
         {
-            margin = font.getStringWidth( "_" );
+            margin = fontRenderer.getStringWidth( "_" );
 
             if ( inputString2.isEmpty() && !inputString1.isEmpty() )
             {
@@ -335,57 +342,70 @@ public class ExpBottlingMachineScreen
     @Override
     protected void drawGuiContainerBackgroundLayer( float partialTicks, int mouseX, int mouseY )
     {
-        GlStateManager.color4f( 1.0F, 1.0F, 1.0F, 1.0F );
-        getMinecraft().getTextureManager().bindTexture( GUI_TEXTURE );
-        blit( guiLeft, guiTop, 0, 0, xSize, ySize );
-
+        GlStateManager.color( 1.0F, 1.0F, 1.0F, 1.0F );
+        mc.getTextureManager().bindTexture( GUI_TEXTURE );
+        drawTexturedModalRect( guiLeft, guiTop, 0, 0, xSize, ySize );
         drawPlayerHead( 142, 27 );
     }
 
     @Override
-    public void tick()
+    public void updateScreen()
     {
-        super.tick();
+        super.updateScreen();
         blinkCount++;
     }
 
     @Override
-    public boolean mouseReleased( double x, double y, int button )
+    protected void mouseReleased( int mouseX, int mouseY, int state )
     {
-        if ( isInBox( ( int )x, ( int )y, 18, 79, 33, 94 ) )
+        if ( isInBox( mouseX, mouseY, 18, 79, 33, 94 ) )
         {
-            return true;
+            return;
         }
-        return super.mouseReleased( x, y, button );
+        super.mouseReleased( mouseX, mouseY, state );
     }
 
     @Override
-    public boolean mouseClicked( double x, double y, int button )
+    protected void mouseClicked( int mouseX, int mouseY, int mouseButton )
+        throws IOException
     {
-        if ( isInBox( ( int )x, ( int )y, 18, 79, 33, 94 ) )
+        if ( isInBox( mouseX, mouseY, 18, 79, 33, 94 ) )
         {
             activeInput = 0;
-            ClickType clickType = hasShiftDown() ? ClickType.QUICK_MOVE : ClickType.PICKUP;
-            if ( container.takeBottledExp( button, clickType, playerInventory.player ) )
+            ClickType clickType = isShiftKeyDown() ? ClickType.QUICK_MOVE : ClickType.PICKUP;
+            if ( container.takeBottledExp( mouseButton, clickType, inventoryPlayer.player ) )
             {
-                Networks.EXP_BOTTLING.sendToServer( new TakeBottledExp( button, clickType ) );
+                Networks.EXP_BOTTLING.sendToServer( new TakeBottledExp( mouseButton, clickType ) );
             }
-            return true;
+            return;
         }
-        else if ( buttons.stream().noneMatch( e -> e.isMouseOver( x, y ) ) )
+        else
         {
-            activeInput = 0;
-            if ( isInBox( ( int )x, ( int )y, 48, 47, 138, 63 ) )
+            boolean isButtonClicked = false;
+            for ( GuiButton button : buttonList )
             {
-                activeInput = 1;
+                if ( button.isMouseOver() )
+                {
+                    isButtonClicked = true;
+                    break;
+                }
             }
-            else if ( isInBox( ( int )x, ( int )y, 48, 78, 138, 94 ) )
+            if ( !isButtonClicked )
             {
-                activeInput = 2;
+                activeInput = 0;
+                if ( isInBox( mouseX, mouseY, 48, 47, 138, 63 ) )
+                {
+                    activeInput = 1;
+                }
+                else if ( isInBox( mouseX, mouseY, 48, 78, 138, 94 ) )
+                {
+                    activeInput = 2;
+                }
             }
         }
-        return super.mouseClicked( x, y, button );
+        super.mouseClicked( mouseX, mouseY, mouseButton );
     }
+
 
     @Override
     public void sendAllContents( Container containerToSend, NonNullList< ItemStack > itemsList )
@@ -404,6 +424,11 @@ public class ExpBottlingMachineScreen
 
     @Override
     public void sendWindowProperty( Container containerIn, int varToUpdate, int newValue )
+    {
+    }
+
+    @Override
+    public void sendAllWindowProperties( Container containerIn, IInventory inventory )
     {
     }
 }

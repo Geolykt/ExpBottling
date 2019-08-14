@@ -27,15 +27,21 @@ package net.eidee.minecraft.exp_bottling.registry;
 import net.eidee.minecraft.exp_bottling.ExpBottling;
 import net.eidee.minecraft.exp_bottling.constants.Names;
 import net.eidee.minecraft.exp_bottling.item.BottledExpItem;
+import net.eidee.minecraft.exp_bottling.item.Items;
 
+import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
+import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.registries.IForgeRegistry;
 
-@Mod.EventBusSubscriber( modid = ExpBottling.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD )
+@Mod.EventBusSubscriber( modid = ExpBottling.MOD_ID )
 public class ItemRegistry
 {
     @SubscribeEvent
@@ -44,12 +50,19 @@ public class ItemRegistry
         IForgeRegistry< Item > registry = event.getRegistry();
 
         Item item;
-        Item.Properties prop;
         {
-            prop = new Item.Properties().group( ItemGroup.MISC );
-
-            item = new BottledExpItem( prop ).setRegistryName( Names.BOTTLED_EXP );
+            item = new BottledExpItem().setUnlocalizedName( Names.BOTTLED_EXP.replace( ':', '.' ) )
+                                       .setRegistryName( Names.BOTTLED_EXP )
+                                       .setCreativeTab( CreativeTabs.MISC );
             registry.register( item );
         }
+    }
+
+    @SubscribeEvent
+    @SideOnly( Side.CLIENT )
+    public static void modelRegister( ModelRegistryEvent event )
+    {
+        ModelResourceLocation key = new ModelResourceLocation( Names.BOTTLED_EXP, "inventory" );
+        ModelLoader.setCustomModelResourceLocation( Items.BOTTLED_EXP, 0, key );
     }
 }

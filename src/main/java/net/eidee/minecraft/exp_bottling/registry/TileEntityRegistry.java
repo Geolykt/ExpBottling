@@ -24,27 +24,25 @@
 
 package net.eidee.minecraft.exp_bottling.registry;
 
-import net.eidee.minecraft.exp_bottling.ExpBottling;
+import static net.eidee.minecraft.exp_bottling.ExpBottling.MOD_ID;
+
 import net.eidee.minecraft.exp_bottling.constants.Names;
-import net.eidee.minecraft.exp_bottling.inventory.container.ExpBottlingMachineContainer;
+import net.eidee.minecraft.exp_bottling.tileentity.ExpBottlingMachineTileEntity;
 
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 
-@Mod.EventBusSubscriber( modid = ExpBottling.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD )
-public class ContainerTypeRegistry
+public class TileEntityRegistry
 {
-    @SubscribeEvent
-    public static void register( RegistryEvent.Register< ContainerType< ? > > event )
+    private static final ResourceLocation KEY_EXP_BOTTLING_MACHINE;
+
+    static
     {
-        IForgeRegistry< ContainerType< ? > > registry = event.getRegistry();
-        ContainerType< ? > containerType;
-        {
-            containerType = new ContainerType<>( ExpBottlingMachineContainer::new ).setRegistryName( Names.EXP_BOTTLING_MACHINE );
-            registry.register( containerType );
-        }
+        KEY_EXP_BOTTLING_MACHINE = new ResourceLocation( MOD_ID, Names.EXP_BOTTLING_MACHINE );
+    }
+
+    public static void register()
+    {
+        GameRegistry.registerTileEntity( ExpBottlingMachineTileEntity.class, KEY_EXP_BOTTLING_MACHINE );
     }
 }

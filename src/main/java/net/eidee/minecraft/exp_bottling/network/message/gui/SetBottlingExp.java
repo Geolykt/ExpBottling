@@ -24,11 +24,18 @@
 
 package net.eidee.minecraft.exp_bottling.network.message.gui;
 
-import net.minecraft.network.PacketBuffer;
+import io.netty.buffer.ByteBuf;
+
+import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 
 public class SetBottlingExp
+    implements IMessage
 {
     private int expValue;
+
+    public SetBottlingExp()
+    {
+    }
 
     public SetBottlingExp( int expValue )
     {
@@ -40,13 +47,15 @@ public class SetBottlingExp
         return expValue;
     }
 
-    public static void encode( SetBottlingExp message, PacketBuffer buffer )
+    @Override
+    public void fromBytes( ByteBuf buf )
     {
-        buffer.writeInt( message.expValue );
+        expValue = buf.readInt();
     }
 
-    public static SetBottlingExp decode( PacketBuffer buffer )
+    @Override
+    public void toBytes( ByteBuf buf )
     {
-        return new SetBottlingExp( buffer.readInt() );
+        buf.writeInt( expValue );
     }
 }

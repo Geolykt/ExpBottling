@@ -26,9 +26,8 @@ package net.eidee.minecraft.exp_bottling.network;
 
 import static net.eidee.minecraft.exp_bottling.ExpBottling.MOD_ID;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraftforge.fml.common.network.NetworkRegistry;
+import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 
 public class Networks
 {
@@ -36,16 +35,10 @@ public class Networks
     {
     }
 
-    private static final ResourceLocation EXP_BOTTLING_NAME = new ResourceLocation( MOD_ID, "exp_bottling" );
-    private static final String EXP_BOTTLING_PROTOCOL_VERSION = "1";
-
-    public static SimpleChannel EXP_BOTTLING;
+    public static SimpleNetworkWrapper EXP_BOTTLING;
 
     public static void init()
     {
-        EXP_BOTTLING = NetworkRegistry.newSimpleChannel( EXP_BOTTLING_NAME,
-                                                         () -> EXP_BOTTLING_PROTOCOL_VERSION,
-                                                         EXP_BOTTLING_PROTOCOL_VERSION::equals,
-                                                         EXP_BOTTLING_PROTOCOL_VERSION::equals );
+        EXP_BOTTLING = NetworkRegistry.INSTANCE.newSimpleChannel( MOD_ID );
     }
 }

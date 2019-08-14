@@ -33,16 +33,17 @@ import net.eidee.minecraft.exp_bottling.item.BottledExpItem;
 import net.eidee.minecraft.exp_bottling.item.Items;
 import net.eidee.minecraft.exp_bottling.util.ExperienceUtil;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.CraftResultInventory;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.ClickType;
+import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.container.ClickType;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.Slot;
+import net.minecraft.inventory.InventoryBasic;
+import net.minecraft.inventory.InventoryCraftResult;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.IWorldPosCallable;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
@@ -51,19 +52,14 @@ public class ExpBottlingMachineContainer
 {
     private final IInventory inputInventory;
     private final IInventory outputInventory;
-    private final PlayerInventory playerInventory;
-    private final IWorldPosCallable worldPosCallable;
+    private final InventoryPlayer playerInventory;
+    private final World world;
+    private final BlockPos pos;
     private int expValue;
 
-    public ExpBottlingMachineContainer( int id, PlayerInventory playerInventory )
+    public ExpBottlingMachineContainer( InventoryPlayer playerInventory, World world, BlockPos pos )
     {
-        this( id, playerInventory, IWorldPosCallable.DUMMY );
-    }
-
-    public ExpBottlingMachineContainer( int id, PlayerInventory playerInventory, IWorldPosCallable worldPosCallable )
-    {
-        super( ContainerTypes.EXP_BOTTLING_MACHINE, id );
-        this.inputInventory = new Inventory( 1 )
+        this.inputInventory = new InventoryBasic( "ExpBottling", false, 1 )
         {
             @Override
             public void markDirty()
@@ -72,21 +68,22 @@ public class ExpBottlingMachineContainer
                 onCraftMatrixChanged( this );
             }
         };
-        this.outputInventory = new CraftResultInventory();
+        this.outputInventory = new InventoryCraftResult();
         this.playerInventory = playerInventory;
-        this.worldPosCallable = worldPosCallable;
+        this.world = world;
+        this.pos = pos;
         this.inputInventory.openInventory( playerInventory.player );
 
-        addSlot( new Slot( this.inputInventory, 0, 17, 37 )
+        addSlotToContainer( new Slot( this.inputInventory, 0, 17, 37 )
         {
             @Override
             public boolean isItemValid( ItemStack stack )
             {
-                return stack.getItem() == net.minecraft.item.Items.GLASS_BOTTLE;
+                return stack.getItem() == net.minecraft.init.Items.GLASS_BOTTLE;
             }
         } );
 
-        addSlot( new Slot( this.outputInventory, 0, 17, 78 )
+        addSlotToContainer( new Slot( this.outputInventory, 0, 17, 78 )
         {
             @Override
             public boolean isItemValid( ItemStack stack )
@@ -101,7 +98,7 @@ public class ExpBottlingMachineContainer
             }
 
             @Override
-            public ItemStack onTake( PlayerEntity thePlayer, ItemStack stack )
+            public ItemStack onTake( EntityPlayer thePlayer, ItemStack stack )
             {
                 onCraftMatrixChanged( outputInventory );
                 return super.onTake( thePlayer, stack );
@@ -112,13 +109,13 @@ public class ExpBottlingMachineContainer
         {
             for ( int j = 0; j < 9; ++j )
             {
-                addSlot( new Slot( playerInventory, j + i * 9 + 9, 38 + j * 18, 122 + i * 18 ) );
+                addSlotToContainer( new Slot( playerInventory, j + i * 9 + 9, 38 + j * 18, 122 + i * 18 ) );
             }
         }
 
         for ( int i = 0; i < 9; ++i )
         {
-            addSlot( new Slot( playerInventory, i, 38 + i * 18, 180 ) );
+            addSlotToContainer( new Slot( playerInventory, i, 38 + i * 18, 180 ) );
         }
     }
 
@@ -129,7 +126,7 @@ public class ExpBottlingMachineContainer
         onCraftMatrixChanged( this.inputInventory );
     }
 
-    public boolean takeBottledExp( int dragType, ClickType clickTypeIn, PlayerEntity player )
+    public boolean takeBottledExp( int dragType, ClickType clickTypeIn, EntityPlayer player )
     {
         if ( !inputInventory.getStackInSlot( 0 ).isEmpty() )
         {
@@ -141,9 +138,9 @@ public class ExpBottlingMachineContainer
             {
                 ItemStack slotClick = slotClick( 1, dragType, clickTypeIn, player );
                 if ( slotClick.getItem() == copy.getItem() &&
-                     Objects.equals( slotClick.getTag(), copy.getTag() ) )
+                     Objects.equals( slotClick.getTagCompound(), copy.getTagCompound() ) )
                 {
-                    if ( !player.world.isRemote() )
+                    if ( !player.world.isRemote )
                     {
                         ExperienceUtil.removeExpFromPlayer( player, tagExp );
                     }
@@ -156,22 +153,32 @@ public class ExpBottlingMachineContainer
     }
 
     @Override
-    public boolean canInteractWith( PlayerEntity playerIn )
+    public boolean canInteractWith( EntityPlayer playerIn )
     {
-        return isWithinUsableDistance( worldPosCallable, playerIn, Blocks.EXP_BOTTLING_MACHINE );
+        if ( world.getBlockState( pos ).getBlock() != Blocks.EXP_BOTTLING_MACHINE )
+        {
+            return false;
+        }
+        else
+        {
+            return playerIn.getDistanceSq( ( double )pos.getX() + 0.5D,
+                                           ( double )pos.getY() + 0.5D,
+                                           ( double )pos.getZ() + 0.5D ) <= 64.0D;
+        }
     }
 
     @Override
-    public void onContainerClosed( PlayerEntity playerIn )
+    public void onContainerClosed( EntityPlayer playerIn )
     {
         super.onContainerClosed( playerIn );
-        worldPosCallable.consume( ( world, blockPos ) -> {
-            clearContainer( playerIn, world, this.inputInventory );
-        } );
+        if ( !world.isRemote )
+        {
+            clearContainer( playerIn, playerIn.world, inputInventory );
+        }
     }
 
     @Override
-    public ItemStack transferStackInSlot( PlayerEntity playerIn, int index )
+    public ItemStack transferStackInSlot( EntityPlayer playerIn, int index )
     {
         ItemStack stack = ItemStack.EMPTY;
         Slot slot = inventorySlots.get( index );
@@ -217,7 +224,7 @@ public class ExpBottlingMachineContainer
         boolean flag = expValue > 0 && !inputInventory.getStackInSlot( 0 ).isEmpty();
         if ( flag )
         {
-            PlayerEntity player = playerInventory.player;
+            EntityPlayer player = playerInventory.player;
             flag = ExperienceUtil.getPlayerExp( player ) >= expValue;
             if ( flag )
             {
@@ -235,7 +242,7 @@ public class ExpBottlingMachineContainer
     }
 
     @Override
-    public ItemStack slotClick( int slotId, int dragType, ClickType clickTypeIn, PlayerEntity player )
+    public ItemStack slotClick( int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player )
     {
         if ( slotId == 1 )
         {

@@ -27,7 +27,7 @@ package net.eidee.minecraft.exp_bottling.block;
 import net.eidee.minecraft.exp_bottling.constants.Names;
 
 import net.minecraft.block.Block;
-import net.minecraftforge.registries.ObjectHolder;
+import net.minecraftforge.fml.common.registry.GameRegistry;
 
 public class Blocks
 {
@@ -35,7 +35,6 @@ public class Blocks
     {
     }
 
-    @ObjectHolder( Names.EXP_BOTTLING_MACHINE )
+    @GameRegistry.ObjectHolder( Names.EXP_BOTTLING_MACHINE )
     public static Block EXP_BOTTLING_MACHINE;
-
 }

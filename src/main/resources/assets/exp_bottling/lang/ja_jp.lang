@@ -1,0 +1,6 @@
+tile.exp_bottling.exp_bottling_machine.name=経験値瓶詰め機
+
+item.exp_bottling.bottled_exp.name=瓶詰めの経験値
+item.exp_bottling.bottled_exp.tooltip.0=経験値: %,d
+
+container.exp_bottling.exp_bottling_machine=経験値瓶詰め機
