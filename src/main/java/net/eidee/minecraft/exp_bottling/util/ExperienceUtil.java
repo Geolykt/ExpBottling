@@ -62,7 +62,7 @@ public class ExperienceUtil
     public static int levelToExp( int level, float expBar )
     {
         int sum = IntStream.range( 0, level ).map( ExperienceUtil::expBarCap ).sum();
-        return sum + ( int )Math.floor( expBarCap( level ) * expBar );
+        return sum + Math.round( expBarCap( level ) * expBar );
     }
 
     public static int getPlayerExp( PlayerEntity player )

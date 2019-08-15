@@ -31,6 +31,7 @@ import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import mcp.MethodsReturnNonnullByDefault;
+import net.eidee.minecraft.exp_bottling.util.ExperienceUtil;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.resources.I18n;
@@ -96,7 +97,7 @@ public class BottledExpItem
             int exp = getTagExperience( stack );
             if ( exp > 0 )
             {
-                player.giveExperiencePoints( exp );
+                ExperienceUtil.addExpToPlayer( player, exp );
             }
         }
 
