@@ -1,7 +1,7 @@
 {
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/exp-bottling",
   "promos": {
-    "1.14.4-latest": "1.14.4-3",
+    "1.14.4-latest": "1.14.4-4",
     "1.14.4-recommended": "1.14.4-2",
     "1.12.2-latest": "1.12.2-3",
     "1.12.2-recommended": "1.12.2-2"
@@ -9,7 +9,8 @@
   "1.14.4": {
     "1.14.4-1": "新規公開 / New release",
     "1.14.4-2": "経験値の計算方法を修正 / Fix calculation method for experience.",
-    "1.14.4-3": "zh_cnの言語ファイルを追加 訳者: Aikini / Add zh_cn language file. Author: Aikini"
+    "1.14.4-3": "zh_cnの言語ファイルを追加 訳者: Aikini / Add zh_cn language file. Author: Aikini",
+    "1.14.4-4": "Modリストでのクラッシュを修正 / Fix crash on the mod list."
   },
   "1.12.2": {
     "1.12.2-1": "1.12.2に対応 / MC1.12.2 Supported",
