@@ -31,9 +31,13 @@ import net.eidee.minecraft.exp_bottling.constants.Names;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -51,7 +55,8 @@ public class BlockRegistry
         Block.Properties prop;
         {
             prop = Block.Properties.create( Material.IRON )
-                                   .hardnessAndResistance( 3.0F );
+                                   .hardnessAndResistance( 3.0F )
+                                   .doesNotBlockMovement();
             block = new ExpBottlingMachineBlock( prop ).setRegistryName( Names.EXP_BOTTLING_MACHINE );
             registry.register( block );
         }
@@ -70,5 +75,11 @@ public class BlockRegistry
             item = new BlockItem( Blocks.EXP_BOTTLING_MACHINE, prop ).setRegistryName( Names.EXP_BOTTLING_MACHINE );
             registry.register( item );
         }
+    }
+
+    @OnlyIn( Dist.CLIENT )
+    public static void renderTypeRegister()
+    {
+        RenderTypeLookup.setRenderLayer( Blocks.EXP_BOTTLING_MACHINE, RenderType.func_228641_d_() );
     }
 }

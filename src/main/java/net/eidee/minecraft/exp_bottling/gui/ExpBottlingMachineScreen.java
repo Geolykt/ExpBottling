@@ -25,13 +25,16 @@
 package net.eidee.minecraft.exp_bottling.gui;
 
 import static net.eidee.minecraft.exp_bottling.ExpBottling.MOD_ID;
-import static net.eidee.minecraft.exp_bottling.ExpBottling.logger;
 
 import java.util.Map;
+import java.util.Objects;
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 import mcp.MethodsReturnNonnullByDefault;
 import net.eidee.minecraft.exp_bottling.inventory.container.ExpBottlingMachineContainer;
 import net.eidee.minecraft.exp_bottling.network.Networks;
@@ -40,10 +43,16 @@ import net.eidee.minecraft.exp_bottling.network.message.gui.TakeBottledExp;
 import net.eidee.minecraft.exp_bottling.util.ExperienceUtil;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.model.GenericHeadModel;
 import net.minecraft.client.renderer.entity.model.HumanoidHeadModel;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.entity.player.PlayerEntity;
@@ -73,7 +82,7 @@ public class ExpBottlingMachineScreen
         GUI_TEXTURE = new ResourceLocation( MOD_ID, "textures/gui/container/exp_bottling_machine.png" );
     }
 
-    private ResourceLocation playerSkin;
+    private RenderType playerSkin;
     private GenericHeadModel head;
     private String inputString1;
     private String inputString2;
@@ -89,15 +98,18 @@ public class ExpBottlingMachineScreen
         ySize = 204;
     }
 
-    private ResourceLocation getPlayerSkin()
+    private RenderType getPlayerSkin()
     {
         Minecraft minecraft = getMinecraft();
+        ClientPlayerEntity player = Objects.requireNonNull( minecraft.player );
         SkinManager skinManager = minecraft.getSkinManager();
         MinecraftProfileTexture.Type skinType = MinecraftProfileTexture.Type.SKIN;
+        GameProfile gameProfile = player.getGameProfile();
+
         Map< MinecraftProfileTexture.Type, MinecraftProfileTexture > skins;
-        skins = skinManager.loadSkinFromCache( minecraft.player.getGameProfile() );
-        return skins.containsKey( skinType ) ? skinManager.loadSkin( skins.get( skinType ), skinType )
-                                             : DefaultPlayerSkin.getDefaultSkin( minecraft.player.getUniqueID() );
+        skins = skinManager.loadSkinFromCache( gameProfile );
+        return skins.containsKey( skinType ) ? RenderType.func_228644_e_( skinManager.loadSkin( skins.get( skinType ), skinType ) )
+                                             : RenderType.func_228640_c_( DefaultPlayerSkin.getDefaultSkin( player.getUniqueID() ) );
     }
 
     private void drawString( String text, int x, int y, int color )
@@ -127,18 +139,29 @@ public class ExpBottlingMachineScreen
 
     private void drawPlayerHead( int x, int y )
     {
-        getMinecraft().getTextureManager().bindTexture( playerSkin );
-        GlStateManager.pushMatrix();
-        GlStateManager.disableCull();
-        GlStateManager.translatef( guiLeft + x + 8, guiTop + y + 16, 0.0F );
-        GlStateManager.enableRescaleNormal();
-        GlStateManager.scalef( -32.0F, -32.0F, 32.0F );
-        GlStateManager.rotatef( 180.0F, 0.0F, 0.0F, 1.0F );
-        GlStateManager.rotatef( 180.0F, 0.0F, 1.0F, 0.0F );
-        GlStateManager.enableAlphaTest();
-        GlStateManager.setProfile( GlStateManager.Profile.PLAYER_SKIN );
-        head.func_217104_a( 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0625F );
-        GlStateManager.popMatrix();
+        RenderHelper.func_227783_c_();
+
+        RenderSystem.pushMatrix();
+        RenderSystem.disableCull();
+        RenderSystem.translatef( guiLeft + x + 8, guiTop + y + 16, 0.0F );
+        RenderSystem.enableRescaleNormal();
+        RenderSystem.scalef( -32.0F, -32.0F, 32.0F );
+        RenderSystem.rotatef( 180.0F, 0.0F, 0.0F, 1.0F );
+        RenderSystem.rotatef( 180.0F, 0.0F, 1.0F, 0.0F );
+        RenderSystem.enableAlphaTest();
+
+        MatrixStack matrixStack = new MatrixStack();
+        head.func_225603_a_( 0.0F, 0.0F, 0.0F );
+        IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.func_228455_a_( Tessellator.getInstance().getBuffer() );
+        IVertexBuilder ivertexbuilder = renderTypeBuffer.getBuffer( playerSkin );
+        head.func_225598_a_( matrixStack, ivertexbuilder, 15728880, OverlayTexture.field_229196_a_, 1.0F, 1.0F, 1.0F, 1.0F );
+
+        matrixStack.func_227865_b_();
+        renderTypeBuffer.func_228461_a_();
+
+        RenderSystem.popMatrix();
+
+        RenderHelper.func_227784_d_();
     }
 
     private void buttonHandle( Button button )
@@ -242,12 +265,7 @@ public class ExpBottlingMachineScreen
         inputString1 = "";
         inputString2 = "";
 
-        final String[] buttonText = {
-            "1", "2", "3",
-            "4", "5", "6",
-            "7", "8", "9",
-            "Lv", "0", "BS"
-        };
+        final String[] buttonText = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "Lv", "0", "BS" };
         for ( int i = 0; i < buttonText.length; i++ )
         {
             int x = guiLeft + ( ( i % 3 ) * 21 );
@@ -270,12 +288,12 @@ public class ExpBottlingMachineScreen
     protected void drawGuiContainerForegroundLayer( int mouseX, int mouseY )
     {
         drawCenteredString( getTitle().getFormattedText(), 118, 6, 4210752 );
-        drawString( playerInventory.getDisplayName().getFormattedText(), 38, ySize - 91, 4210752 );
+        drawString( playerInventory.getDisplayName().getFormattedText(), 38, ySize - 92, 4210752 );
 
         PlayerEntity player = playerInventory.player;
         int playerExp = ExperienceUtil.getPlayerExp( player );
         String exp = Integer.toString( playerExp );
-        drawRightAlignedString( exp, 136 - font.getStringWidth( "_" ), 28 + getVerticalCenter( 14 ), 0xFFFFFF );
+        drawRightAlignedString( exp, 136 - font.getStringWidth( "_" ), 29 + getVerticalCenter( 14 ), 0xFFFFFF );
 
         String input = inputString1;
         int margin = 0;
@@ -302,7 +320,7 @@ public class ExpBottlingMachineScreen
                 color = 0xA0A0A0;
             }
         }
-        drawRightAlignedString( input, 136 - margin, 48 + getVerticalCenter( 14 ), color );
+        drawRightAlignedString( input, 136 - margin, 49 + getVerticalCenter( 14 ), color );
 
         input = inputString2;
         margin = 0;
@@ -329,13 +347,13 @@ public class ExpBottlingMachineScreen
                 color = 0xA0A0A0;
             }
         }
-        drawRightAlignedString( input, 136 - margin, 79 + getVerticalCenter( 14 ), color );
+        drawRightAlignedString( input, 136 - margin, 80 + getVerticalCenter( 14 ), color );
     }
 
     @Override
     protected void drawGuiContainerBackgroundLayer( float partialTicks, int mouseX, int mouseY )
     {
-        GlStateManager.color4f( 1.0F, 1.0F, 1.0F, 1.0F );
+        RenderSystem.color4f( 1.0F, 1.0F, 1.0F, 1.0F );
         getMinecraft().getTextureManager().bindTexture( GUI_TEXTURE );
         blit( guiLeft, guiTop, 0, 0, xSize, ySize );
 
@@ -372,7 +390,8 @@ public class ExpBottlingMachineScreen
             }
             return true;
         }
-        else if ( buttons.stream().noneMatch( e -> e.isMouseOver( x, y ) ) )
+        else if ( buttons.stream()
+                         .noneMatch( e -> e.isMouseOver( x, y ) ) )
         {
             activeInput = 0;
             if ( isInBox( ( int )x, ( int )y, 48, 47, 138, 63 ) )
@@ -390,7 +409,10 @@ public class ExpBottlingMachineScreen
     @Override
     public void sendAllContents( Container containerToSend, NonNullList< ItemStack > itemsList )
     {
-        sendSlotContents( containerToSend, 0, containerToSend.getSlot( 0 ).getStack() );
+        sendSlotContents( containerToSend,
+                          0,
+                          containerToSend.getSlot( 0 )
+                                         .getStack() );
     }
 
     @Override

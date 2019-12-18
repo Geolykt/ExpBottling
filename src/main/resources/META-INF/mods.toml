@@ -48,6 +48,6 @@ Add a block that can be used to make bottled EXP.
 [[dependencies.exp_bottling]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.14.4]"
+    versionRange="[1.15.1]"
     ordering="NONE"
     side="BOTH"

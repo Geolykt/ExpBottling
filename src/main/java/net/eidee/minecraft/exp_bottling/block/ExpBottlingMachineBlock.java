@@ -31,7 +31,6 @@ import mcp.MethodsReturnNonnullByDefault;
 import net.eidee.minecraft.exp_bottling.tileentity.ExpBottlingMachineTileEntity;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -40,20 +39,21 @@ import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockRenderLayer;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
-import net.minecraftforge.common.extensions.IForgeBlock;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class ExpBottlingMachineBlock
     extends Block
-    implements IForgeBlock
 {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
@@ -63,27 +63,26 @@ public class ExpBottlingMachineBlock
     }
 
     @Override
+    public VoxelShape getCollisionShape( BlockState p_220071_1_,
+                                         IBlockReader p_220071_2_,
+                                         BlockPos p_220071_3_,
+                                         ISelectionContext p_220071_4_ )
+    {
+        return VoxelShapes.fullCube();
+    }
+
+    @Override
     protected void fillStateContainer( StateContainer.Builder< Block, BlockState > builder )
     {
         builder.add( FACING );
     }
 
     @Override
-    public BlockRenderType getRenderType( BlockState state )
-    {
-        return BlockRenderType.MODEL;
-    }
-
-    @Override
-    public BlockRenderLayer getRenderLayer()
-    {
-        return BlockRenderLayer.CUTOUT;
-    }
-
-    @Override
     public BlockState getStateForPlacement( BlockItemUseContext context )
     {
-        return getDefaultState().with( FACING, context.getPlacementHorizontalFacing().getOpposite() );
+        return getDefaultState().with( FACING,
+                                       context.getPlacementHorizontalFacing()
+                                              .getOpposite() );
     }
 
     @Override
@@ -100,16 +99,16 @@ public class ExpBottlingMachineBlock
     }
 
     @Override
-    public boolean onBlockActivated( BlockState state,
-                                     World worldIn,
-                                     BlockPos pos,
-                                     PlayerEntity player,
-                                     Hand handIn,
-                                     BlockRayTraceResult hit )
+    public ActionResultType func_225533_a_( BlockState state,
+                                            World world,
+                                            BlockPos pos,
+                                            PlayerEntity player,
+                                            Hand hand,
+                                            BlockRayTraceResult rayTraceResult )
     {
-        if ( !worldIn.isRemote() )
+        if ( !world.isRemote() )
         {
-            TileEntity tileEntity = worldIn.getTileEntity( pos );
+            TileEntity tileEntity = world.getTileEntity( pos );
             if ( tileEntity instanceof ExpBottlingMachineTileEntity )
             {
                 ExpBottlingMachineTileEntity bottlingMachine = ( ExpBottlingMachineTileEntity )tileEntity;
@@ -119,6 +118,6 @@ public class ExpBottlingMachineBlock
                 }
             }
         }
-        return true;
+        return ActionResultType.SUCCESS;
     }
 }

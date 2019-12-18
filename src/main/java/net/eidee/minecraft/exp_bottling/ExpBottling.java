@@ -27,6 +27,7 @@ package net.eidee.minecraft.exp_bottling;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import net.eidee.minecraft.exp_bottling.network.Networks;
+import net.eidee.minecraft.exp_bottling.registry.BlockRegistry;
 import net.eidee.minecraft.exp_bottling.registry.MessageRegistry;
 import net.eidee.minecraft.exp_bottling.registry.ScreenRegistry;
 
@@ -67,5 +68,6 @@ public class ExpBottling
     private void clientSetup( FMLClientSetupEvent event )
     {
         ScreenRegistry.register();
+        BlockRegistry.renderTypeRegister();
     }
 }
