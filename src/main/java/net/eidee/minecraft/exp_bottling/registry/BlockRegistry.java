@@ -80,6 +80,6 @@ public class BlockRegistry
     @OnlyIn( Dist.CLIENT )
     public static void renderTypeRegister()
     {
-        RenderTypeLookup.setRenderLayer( Blocks.EXP_BOTTLING_MACHINE, RenderType.func_228641_d_() );
+        RenderTypeLookup.setRenderLayer( Blocks.EXP_BOTTLING_MACHINE, RenderType.func_228643_e_() );
     }
 }

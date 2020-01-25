@@ -66,7 +66,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.client.config.GuiButtonExt;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
@@ -84,10 +83,9 @@ public class ExpBottlingMachineScreen
 
     private RenderType playerSkin;
     private GenericHeadModel head;
-    private String inputString1;
-    private String inputString2;
-    private int blinkCount;
+    private String[] input;
     private int activeInput;
+    private int blinkCount;
 
     public ExpBottlingMachineScreen( ExpBottlingMachineContainer screenContainer,
                                      PlayerInventory inv,
@@ -152,9 +150,17 @@ public class ExpBottlingMachineScreen
 
         MatrixStack matrixStack = new MatrixStack();
         head.func_225603_a_( 0.0F, 0.0F, 0.0F );
-        IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.func_228455_a_( Tessellator.getInstance().getBuffer() );
+        IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.func_228455_a_( Tessellator.getInstance()
+                                                                                               .getBuffer() );
         IVertexBuilder ivertexbuilder = renderTypeBuffer.getBuffer( playerSkin );
-        head.func_225598_a_( matrixStack, ivertexbuilder, 15728880, OverlayTexture.field_229196_a_, 1.0F, 1.0F, 1.0F, 1.0F );
+        head.func_225598_a_( matrixStack,
+                             ivertexbuilder,
+                             15728880,
+                             OverlayTexture.field_229196_a_,
+                             1.0F,
+                             1.0F,
+                             1.0F,
+                             1.0F );
 
         matrixStack.func_227865_b_();
         renderTypeBuffer.func_228461_a_();
@@ -166,9 +172,20 @@ public class ExpBottlingMachineScreen
 
     private void buttonHandle( Button button )
     {
+        if ( activeInput != 0 && activeInput != 1 )
+        {
+            return;
+        }
+
         String message = button.getMessage();
         switch ( message )
         {
+            case "0":
+                if ( Objects.equals( input[ activeInput ], "0" ) )
+                {
+                    break;
+                }
+
             case "1":
             case "2":
             case "3":
@@ -178,51 +195,30 @@ public class ExpBottlingMachineScreen
             case "7":
             case "8":
             case "9":
-            case "0":
-                if ( activeInput == 1 )
-                {
-                    inputString1 += message;
-                }
-                else if ( activeInput == 2 )
-                {
-                    inputString2 += message;
-                }
+                input[ activeInput ] += message;
                 break;
 
             case "BS":
-                if ( activeInput == 1 && inputString1.length() > 0 )
+                int length = input[ activeInput ].length();
+                if ( length > 0 )
                 {
-                    inputString1 = inputString1.substring( 0, inputString1.length() - 1 );
-                }
-                else if ( activeInput == 2 && inputString2.length() > 0 )
-                {
-                    inputString2 = inputString2.substring( 0, inputString2.length() - 1 );
+                    input[ activeInput ] = input[ activeInput ].substring( 0, length - 1 );
                 }
                 break;
 
             case "Lv":
-                if ( activeInput == 1 && !inputString1.isEmpty() )
+                if ( !input[ activeInput ].isEmpty() )
                 {
-                    int level = Integer.parseInt( inputString1 );
+                    int level = Integer.parseInt( input[ activeInput ] );
                     int exp = ExperienceUtil.levelToExp( level, 0.0F );
-                    inputString1 = Integer.toString( Math.max( exp, 0 ) );
-                }
-                else if ( activeInput == 2 && !inputString2.isEmpty() )
-                {
-                    int level = Integer.parseInt( inputString2 );
-                    int exp = ExperienceUtil.levelToExp( level, 0.0F );
-                    inputString2 = Integer.toString( Math.max( exp, 0 ) );
+                    input[ activeInput ] = Integer.toString( Math.max( exp, 0 ) );
                 }
                 break;
         }
 
-        if ( !inputString1.isEmpty() && Long.parseLong( inputString1 ) > Integer.MAX_VALUE )
+        if ( !input[ activeInput ].isEmpty() && Long.parseLong( input[ activeInput ] ) > Integer.MAX_VALUE )
         {
-            inputString1 = Integer.toString( Integer.MAX_VALUE );
-        }
-        if ( !inputString2.isEmpty() && Long.parseLong( inputString2 ) > Integer.MAX_VALUE )
-        {
-            inputString2 = Integer.toString( Integer.MAX_VALUE );
+            input[ activeInput ] = Integer.toString( Integer.MAX_VALUE );
         }
 
         sendInputValues();
@@ -231,24 +227,24 @@ public class ExpBottlingMachineScreen
     private void sendInputValues()
     {
         int value;
-        if ( inputString1.isEmpty() && inputString2.isEmpty() )
+        if ( input[ 0 ].isEmpty() && input[ 1 ].isEmpty() )
         {
             value = 0;
         }
-        else if ( inputString1.isEmpty() )
+        else if ( input[ 0 ].isEmpty() )
         {
             PlayerEntity player = playerInventory.player;
             int playerExp = ExperienceUtil.getPlayerExp( player );
-            value = playerExp - Integer.parseInt( inputString2 );
+            value = playerExp - Integer.parseInt( input[ 1 ] );
         }
-        else if ( inputString2.isEmpty() )
+        else if ( input[ 1 ].isEmpty() )
         {
-            value = Integer.parseInt( inputString1 );
+            value = Integer.parseInt( input[ 0 ] );
         }
         else
         {
-            int before = Integer.parseInt( inputString1 );
-            int after = Integer.parseInt( inputString2 );
+            int before = Integer.parseInt( input[ 0 ] );
+            int after = Integer.parseInt( input[ 1 ] );
             value = after - before;
         }
         container.setBottlingExp( value );
@@ -262,15 +258,16 @@ public class ExpBottlingMachineScreen
 
         playerSkin = getPlayerSkin();
         head = new HumanoidHeadModel();
-        inputString1 = "";
-        inputString2 = "";
+        input = new String[] { "", "" };
+        activeInput = -1;
+        blinkCount = 0;
 
         final String[] buttonText = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "Lv", "0", "BS" };
         for ( int i = 0; i < buttonText.length; i++ )
         {
             int x = guiLeft + ( ( i % 3 ) * 21 );
             int y = guiTop + ( ( i / 3 ) * 21 );
-            addButton( new GuiButtonExt( 162 + x, 18 + y, 20, 20, buttonText[ i ], this::buttonHandle ) );
+            addButton( new Button( 162 + x, 18 + y, 20, 20, buttonText[ i ], this::buttonHandle ) );
         }
 
         container.addListener( this );
@@ -295,9 +292,36 @@ public class ExpBottlingMachineScreen
         String exp = Integer.toString( playerExp );
         drawRightAlignedString( exp, 136 - font.getStringWidth( "_" ), 29 + getVerticalCenter( 14 ), 0xFFFFFF );
 
-        String input = inputString1;
+        String input = this.input[ 0 ];
         int margin = 0;
         int color = 0xFFFFFF;
+        if ( activeInput == 0 )
+        {
+            if ( blinkCount / 6 % 2 == 0 )
+            {
+                input += "_";
+            }
+            else
+            {
+                margin = font.getStringWidth( "_" );
+            }
+        }
+        else
+        {
+            margin = font.getStringWidth( "_" );
+
+            if ( this.input[ 0 ].isEmpty() && !this.input[ 1 ].isEmpty() )
+            {
+                int afterExp = Integer.parseInt( this.input[ 1 ] );
+                input = Integer.toString( playerExp - afterExp );
+                color = 0xA0A0A0;
+            }
+        }
+        drawRightAlignedString( input, 136 - margin, 49 + getVerticalCenter( 14 ), color );
+
+        input = this.input[ 1 ];
+        margin = 0;
+        color = 0xFFFFFF;
         if ( activeInput == 1 )
         {
             if ( blinkCount / 6 % 2 == 0 )
@@ -313,36 +337,9 @@ public class ExpBottlingMachineScreen
         {
             margin = font.getStringWidth( "_" );
 
-            if ( inputString1.isEmpty() && !inputString2.isEmpty() )
+            if ( this.input[ 1 ].isEmpty() && !this.input[ 0 ].isEmpty() )
             {
-                int afterExp = Integer.parseInt( inputString2 );
-                input = Integer.toString( playerExp - afterExp );
-                color = 0xA0A0A0;
-            }
-        }
-        drawRightAlignedString( input, 136 - margin, 49 + getVerticalCenter( 14 ), color );
-
-        input = inputString2;
-        margin = 0;
-        color = 0xFFFFFF;
-        if ( activeInput == 2 )
-        {
-            if ( blinkCount / 6 % 2 == 0 )
-            {
-                input += "_";
-            }
-            else
-            {
-                margin = font.getStringWidth( "_" );
-            }
-        }
-        else
-        {
-            margin = font.getStringWidth( "_" );
-
-            if ( inputString2.isEmpty() && !inputString1.isEmpty() )
-            {
-                int beforeExp = Integer.parseInt( inputString1 );
+                int beforeExp = Integer.parseInt( this.input[ 0 ] );
                 input = Integer.toString( playerExp - beforeExp );
                 color = 0xA0A0A0;
             }
@@ -382,7 +379,7 @@ public class ExpBottlingMachineScreen
     {
         if ( isInBox( ( int )x, ( int )y, 18, 79, 33, 94 ) )
         {
-            activeInput = 0;
+            activeInput = -1;
             ClickType clickType = hasShiftDown() ? ClickType.QUICK_MOVE : ClickType.PICKUP;
             if ( container.takeBottledExp( button, clickType, playerInventory.player ) )
             {
@@ -390,17 +387,16 @@ public class ExpBottlingMachineScreen
             }
             return true;
         }
-        else if ( buttons.stream()
-                         .noneMatch( e -> e.isMouseOver( x, y ) ) )
+        else if ( buttons.stream().noneMatch( e -> e.isMouseOver( x, y ) ) )
         {
-            activeInput = 0;
+            activeInput = -1;
             if ( isInBox( ( int )x, ( int )y, 48, 47, 138, 63 ) )
             {
-                activeInput = 1;
+                activeInput = 0;
             }
             else if ( isInBox( ( int )x, ( int )y, 48, 78, 138, 94 ) )
             {
-                activeInput = 2;
+                activeInput = 1;
             }
         }
         return super.mouseClicked( x, y, button );
@@ -409,10 +405,7 @@ public class ExpBottlingMachineScreen
     @Override
     public void sendAllContents( Container containerToSend, NonNullList< ItemStack > itemsList )
     {
-        sendSlotContents( containerToSend,
-                          0,
-                          containerToSend.getSlot( 0 )
-                                         .getStack() );
+        sendSlotContents( containerToSend, 0, containerToSend.getSlot( 0 ).getStack() );
     }
 
     @Override
