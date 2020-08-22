@@ -24,7 +24,6 @@
 
 package net.eidee.minecraft.exp_bottling.inventory.container;
 
-import java.util.Objects;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import mcp.MethodsReturnNonnullByDefault;
@@ -122,37 +121,10 @@ public class ExpBottlingMachineContainer
         }
     }
 
-
     public void setBottlingExp( int expValue )
     {
         this.expValue = Math.max( expValue, 0 );
         onCraftMatrixChanged( this.inputInventory );
-    }
-
-    public boolean takeBottledExp( int dragType, ClickType clickTypeIn, PlayerEntity player )
-    {
-        if ( !inputInventory.getStackInSlot( 0 ).isEmpty() )
-        {
-            int playerExp = ExperienceUtil.getPlayerExp( player );
-            ItemStack stackInSlot1 = outputInventory.getStackInSlot( 0 );
-            ItemStack copy = stackInSlot1.copy();
-            int tagExp = BottledExpItem.getTagExperience( stackInSlot1 );
-            if ( tagExp > 0 && playerExp >= tagExp )
-            {
-                ItemStack slotClick = slotClick( 1, dragType, clickTypeIn, player );
-                if ( slotClick.getItem() == copy.getItem() &&
-                     Objects.equals( slotClick.getTag(), copy.getTag() ) )
-                {
-                    if ( !player.world.isRemote() )
-                    {
-                        ExperienceUtil.removeExpFromPlayer( player, tagExp );
-                    }
-                    inputInventory.decrStackSize( 0, 1 );
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     @Override
@@ -229,7 +201,7 @@ public class ExpBottlingMachineContainer
 
         if ( !flag )
         {
-            outputInventory.setInventorySlotContents( 1, ItemStack.EMPTY );
+            outputInventory.clear();
         }
         detectAndSendChanges();
     }
@@ -239,16 +211,42 @@ public class ExpBottlingMachineContainer
     {
         if ( slotId == 1 )
         {
-            if ( clickTypeIn == ClickType.QUICK_MOVE )
+            ItemStack item = ItemStack.EMPTY;
+
+            if ( !inputInventory.getStackInSlot( 0 ).isEmpty() )
             {
-                ItemStack item = transferStackInSlot( player, slotId );
-                detectAndSendChanges();
-                return item;
+                if ( clickTypeIn == ClickType.QUICK_MOVE )
+                {
+                    item = transferStackInSlot( player, slotId );
+                }
+                else if ( clickTypeIn == ClickType.PICKUP )
+                {
+                    ItemStack before = playerInventory.getItemStack().copy();
+                    ItemStack result = super.slotClick( slotId, dragType, clickTypeIn, player );
+                    ItemStack after = playerInventory.getItemStack();
+                    if ( !ItemStack.areItemStacksEqual( before, after ) )
+                    {
+                        item = result;
+                    }
+                }
             }
-            else if ( clickTypeIn != ClickType.PICKUP )
+
+            if ( !item.isEmpty() )
             {
-                return ItemStack.EMPTY;
+                int playerExp = ExperienceUtil.getPlayerExp( player );
+                int tagExp = BottledExpItem.getTagExperience( item );
+                if ( tagExp > 0 && playerExp >= tagExp )
+                {
+                    if ( !player.world.isRemote() )
+                    {
+                        ExperienceUtil.removeExpFromPlayer( player, tagExp );
+                    }
+                    inputInventory.decrStackSize( 0, 1 );
+                }
             }
+
+            detectAndSendChanges();
+            return item;
         }
         return super.slotClick( slotId, dragType, clickTypeIn, player );
     }

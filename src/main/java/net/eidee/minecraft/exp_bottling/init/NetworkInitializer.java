@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 EideeHi
+ * Copyright (c) 2020 EideeHi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,19 +22,23 @@
  * SOFTWARE.
  */
 
-package net.eidee.minecraft.exp_bottling.tileentity;
+package net.eidee.minecraft.exp_bottling.init;
 
-import net.eidee.minecraft.exp_bottling.constants.Names;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraftforge.registries.ObjectHolder;
+import net.eidee.minecraft.exp_bottling.network.Networks;
+import net.eidee.minecraft.exp_bottling.network.message.SetBottlingExp;
 
-public class TileEntityTypes
+public class NetworkInitializer
 {
-    private TileEntityTypes()
+    public static void registerMessage()
     {
+        AtomicInteger id = new AtomicInteger( 0 );
+        Networks.getChannel()
+                .registerMessage( id.getAndIncrement(),
+                                  SetBottlingExp.class,
+                                  SetBottlingExp::encode,
+                                  SetBottlingExp::decode,
+                                  SetBottlingExp::handle );
     }
-
-    @ObjectHolder( Names.EXP_BOTTLING_MACHINE )
-    public static TileEntityType< ExpBottlingMachineTileEntity > EXP_BOTTLING_MACHINE;
 }

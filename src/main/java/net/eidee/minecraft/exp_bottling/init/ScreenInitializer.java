@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 EideeHi
+ * Copyright (c) 2020 EideeHi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,31 +22,20 @@
  * SOFTWARE.
  */
 
-package net.eidee.minecraft.exp_bottling.network.message.gui;
+package net.eidee.minecraft.exp_bottling.init;
 
-import net.minecraft.network.PacketBuffer;
+import net.eidee.minecraft.exp_bottling.gui.ExpBottlingMachineScreen;
+import net.eidee.minecraft.exp_bottling.inventory.container.ContainerTypes;
 
-public class SetBottlingExp
+import net.minecraft.client.gui.ScreenManager;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+
+@OnlyIn( Dist.CLIENT )
+public class ScreenInitializer
 {
-    private int expValue;
-
-    public SetBottlingExp( int expValue )
+    public static void registerScreen()
     {
-        this.expValue = expValue;
-    }
-
-    public int getExpValue()
-    {
-        return expValue;
-    }
-
-    public static void encode( SetBottlingExp message, PacketBuffer buffer )
-    {
-        buffer.writeInt( message.expValue );
-    }
-
-    public static SetBottlingExp decode( PacketBuffer buffer )
-    {
-        return new SetBottlingExp( buffer.readInt() );
+        ScreenManager.registerFactory( ContainerTypes.EXP_BOTTLING_MACHINE, ExpBottlingMachineScreen::new );
     }
 }

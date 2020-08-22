@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 EideeHi
+ * Copyright (c) 2020 EideeHi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package net.eidee.minecraft.exp_bottling.registry;
+package net.eidee.minecraft.exp_bottling.init;
 
 import net.eidee.minecraft.exp_bottling.ExpBottling;
 import net.eidee.minecraft.exp_bottling.block.Blocks;
@@ -44,10 +44,10 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.IForgeRegistry;
 
 @Mod.EventBusSubscriber( modid = ExpBottling.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD )
-public class BlockRegistry
+public class BlockInitializer
 {
     @SubscribeEvent
-    public static void register( RegistryEvent.Register< Block > event )
+    public static void registerBlock( RegistryEvent.Register< Block > event )
     {
         IForgeRegistry< Block > registry = event.getRegistry();
 
@@ -63,7 +63,7 @@ public class BlockRegistry
     }
 
     @SubscribeEvent
-    public static void itemRegister( RegistryEvent.Register< Item > event )
+    public static void registerItem( RegistryEvent.Register< Item > event )
     {
         IForgeRegistry< Item > registry = event.getRegistry();
 
@@ -78,8 +78,8 @@ public class BlockRegistry
     }
 
     @OnlyIn( Dist.CLIENT )
-    public static void renderTypeRegister()
+    public static void registerRenderType()
     {
-        RenderTypeLookup.setRenderLayer( Blocks.EXP_BOTTLING_MACHINE, RenderType.func_228643_e_() );
+        RenderTypeLookup.setRenderLayer( Blocks.EXP_BOTTLING_MACHINE, RenderType.getCutout() );
     }
 }

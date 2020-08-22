@@ -36,16 +36,21 @@ public class Networks
     {
     }
 
-    private static final ResourceLocation EXP_BOTTLING_NAME = new ResourceLocation( MOD_ID, "exp_bottling" );
-    private static final String EXP_BOTTLING_PROTOCOL_VERSION = "1";
+    private static final String PROTOCOL_VERSION;
+    private static final SimpleChannel CHANNEL;
 
-    public static SimpleChannel EXP_BOTTLING;
-
-    public static void init()
+    static
     {
-        EXP_BOTTLING = NetworkRegistry.newSimpleChannel( EXP_BOTTLING_NAME,
-                                                         () -> EXP_BOTTLING_PROTOCOL_VERSION,
-                                                         EXP_BOTTLING_PROTOCOL_VERSION::equals,
-                                                         EXP_BOTTLING_PROTOCOL_VERSION::equals );
+        ResourceLocation channelName = new ResourceLocation( MOD_ID, "exp_bottling" );
+        PROTOCOL_VERSION = "2";
+        CHANNEL = NetworkRegistry.newSimpleChannel( channelName,
+                                                    () -> PROTOCOL_VERSION,
+                                                    PROTOCOL_VERSION::equals,
+                                                    PROTOCOL_VERSION::equals );
+    }
+
+    public static SimpleChannel getChannel()
+    {
+        return CHANNEL;
     }
 }

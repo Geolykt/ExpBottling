@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 EideeHi
+ * Copyright (c) 2020 EideeHi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package net.eidee.minecraft.exp_bottling.registry;
+package net.eidee.minecraft.exp_bottling.init;
 
 import net.eidee.minecraft.exp_bottling.ExpBottling;
 import net.eidee.minecraft.exp_bottling.constants.Names;
@@ -35,10 +35,10 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.IForgeRegistry;
 
 @Mod.EventBusSubscriber( modid = ExpBottling.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD )
-public class ContainerTypeRegistry
+public class ContainerTypeInitializer
 {
     @SubscribeEvent
-    public static void register( RegistryEvent.Register< ContainerType< ? > > event )
+    public static void registerContainerType( RegistryEvent.Register< ContainerType< ? > > event )
     {
         IForgeRegistry< ContainerType< ? > > registry = event.getRegistry();
         ContainerType< ? > containerType;

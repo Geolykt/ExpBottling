@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 EideeHi
+ * Copyright (c) 2020 EideeHi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,25 +22,34 @@
  * SOFTWARE.
  */
 
-package net.eidee.minecraft.exp_bottling.registry;
+package net.eidee.minecraft.exp_bottling.init;
 
-import net.eidee.minecraft.exp_bottling.network.Networks;
-import net.eidee.minecraft.exp_bottling.network.message.gui.SetBottlingExp;
-import net.eidee.minecraft.exp_bottling.network.message.gui.TakeBottledExp;
-import net.eidee.minecraft.exp_bottling.network.message.gui.handler.BottlingExpMessageHandler;
+import net.eidee.minecraft.exp_bottling.ExpBottling;
+import net.eidee.minecraft.exp_bottling.constants.Names;
+import net.eidee.minecraft.exp_bottling.item.BottledExpItem;
 
-public class MessageRegistry
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.IForgeRegistry;
+
+@Mod.EventBusSubscriber( modid = ExpBottling.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD )
+public class ItemInitializer
 {
-    public static void register()
+    @SubscribeEvent
+    public static void registerItem( RegistryEvent.Register< Item > event )
     {
-        int id = 0;
-        Networks.EXP_BOTTLING.registerMessage( id++, SetBottlingExp.class,
-                                               SetBottlingExp::encode,
-                                               SetBottlingExp::decode,
-                                               BottlingExpMessageHandler::setBottlingExp );
-        Networks.EXP_BOTTLING.registerMessage( id++, TakeBottledExp.class,
-                                               TakeBottledExp::encode,
-                                               TakeBottledExp::decode,
-                                               BottlingExpMessageHandler::takeBottledExp );
+        IForgeRegistry< Item > registry = event.getRegistry();
+
+        Item item;
+        Item.Properties prop;
+        {
+            prop = new Item.Properties().group( ItemGroup.MISC );
+
+            item = new BottledExpItem( prop ).setRegistryName( Names.BOTTLED_EXP );
+            registry.register( item );
+        }
     }
 }

@@ -26,6 +26,7 @@ package net.eidee.minecraft.exp_bottling.gui;
 
 import static net.eidee.minecraft.exp_bottling.ExpBottling.MOD_ID;
 
+import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -38,8 +39,7 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import mcp.MethodsReturnNonnullByDefault;
 import net.eidee.minecraft.exp_bottling.inventory.container.ExpBottlingMachineContainer;
 import net.eidee.minecraft.exp_bottling.network.Networks;
-import net.eidee.minecraft.exp_bottling.network.message.gui.SetBottlingExp;
-import net.eidee.minecraft.exp_bottling.network.message.gui.TakeBottledExp;
+import net.eidee.minecraft.exp_bottling.network.message.SetBottlingExp;
 import net.eidee.minecraft.exp_bottling.util.ExperienceUtil;
 
 import net.minecraft.client.Minecraft;
@@ -57,13 +57,15 @@ import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.SkinManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.ClickType;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -75,16 +77,30 @@ public class ExpBottlingMachineScreen
     implements IContainerListener
 {
     private static final ResourceLocation GUI_TEXTURE;
+    private static final ITextComponent[] BUTTON_TEXT;
 
     static
     {
         GUI_TEXTURE = new ResourceLocation( MOD_ID, "textures/gui/container/exp_bottling_machine.png" );
+        BUTTON_TEXT = new ITextComponent[] { new StringTextComponent( "1" ),
+                                             new StringTextComponent( "2" ),
+                                             new StringTextComponent( "3" ),
+                                             new StringTextComponent( "4" ),
+                                             new StringTextComponent( "5" ),
+                                             new StringTextComponent( "6" ),
+                                             new StringTextComponent( "7" ),
+                                             new StringTextComponent( "8" ),
+                                             new StringTextComponent( "9" ),
+                                             new StringTextComponent( "Lv" ),
+                                             new StringTextComponent( "0" ),
+                                             new StringTextComponent( "BS" )
+        };
     }
 
     private RenderType playerSkin;
-    private GenericHeadModel head;
-    private String[] input;
-    private int activeInput;
+    private GenericHeadModel headModel;
+    private EnumMap< Input, String > inputTexts;
+    private Input activeInput;
     private int blinkCount;
 
     public ExpBottlingMachineScreen( ExpBottlingMachineContainer screenContainer,
@@ -106,23 +122,26 @@ public class ExpBottlingMachineScreen
 
         Map< MinecraftProfileTexture.Type, MinecraftProfileTexture > skins;
         skins = skinManager.loadSkinFromCache( gameProfile );
-        return skins.containsKey( skinType ) ? RenderType.func_228644_e_( skinManager.loadSkin( skins.get( skinType ), skinType ) )
-                                             : RenderType.func_228640_c_( DefaultPlayerSkin.getDefaultSkin( player.getUniqueID() ) );
+        if ( skins.containsKey( skinType ) )
+        {
+            return RenderType.getEntityTranslucent( skinManager.loadSkin( skins.get( skinType ), skinType ) );
+        }
+        return RenderType.getEntityCutoutNoCull( DefaultPlayerSkin.getDefaultSkin( player.getUniqueID() ) );
     }
 
-    private void drawString( String text, int x, int y, int color )
+    private void drawString( MatrixStack matrixStack, String string, int x, int y, int color )
     {
-        font.drawString( text, x, y, color );
+        font.drawString( matrixStack, string, x, y, color );
     }
 
-    private void drawCenteredString( String text, int x, int y, int color )
+    private void drawCenteredString( MatrixStack matrixStack, String string, int x, int y, int color )
     {
-        font.drawString( text, x - ( font.getStringWidth( text ) / 2.0F ), y, color );
+        font.drawString( matrixStack, string, x - ( font.getStringWidth( string ) / 2.0F ), y, color );
     }
 
-    private void drawRightAlignedString( String text, int x, int y, int color )
+    private void drawRightAlignedString( MatrixStack matrixStack, String text, int x, int y, int color )
     {
-        font.drawString( text, x - font.getStringWidth( text ), y, color );
+        font.drawString( matrixStack, text, x - font.getStringWidth( text ), y, color );
     }
 
     private int getVerticalCenter( int height )
@@ -135,57 +154,56 @@ public class ExpBottlingMachineScreen
         return x >= guiLeft + xStart && x <= guiLeft + xEnd && y >= guiTop + yStart && y <= guiTop + yEnd;
     }
 
-    private void drawPlayerHead( int x, int y )
+    private void drawPlayerHead( MatrixStack matrixStack, int x, int y )
     {
-        RenderHelper.func_227783_c_();
-
+        RenderSystem.matrixMode( 5889 );
         RenderSystem.pushMatrix();
-        RenderSystem.disableCull();
-        RenderSystem.translatef( guiLeft + x + 8, guiTop + y + 16, 0.0F );
+        RenderSystem.loadIdentity();
+        int k = ( int )getMinecraft().getMainWindow().getGuiScaleFactor();
+        RenderSystem.viewport( ( this.width - 320 ) / 2 * k, ( this.height - 240 ) / 2 * k, 320 * k, 240 * k );
+        RenderSystem.translatef( 0.20F, 0.495F, 0.0F );
+        RenderSystem.multMatrix( Matrix4f.perspective( 90.0D, 1.3333334F, 9.0F, 80.0F ) );
+        RenderSystem.matrixMode( 5888 );
+        matrixStack.push();
+        MatrixStack.Entry matrixStackEntry = matrixStack.getLast();
+        matrixStackEntry.getMatrix().setIdentity();
+        matrixStackEntry.getNormal().setIdentity();
+        matrixStack.translate( 0, 0, 1984.0D );
+        matrixStack.scale( 4.0F, 4.0F, 4.0F );
+        matrixStack.rotate( Vector3f.ZP.rotationDegrees( 180F ) );
+        matrixStack.rotate( Vector3f.YP.rotationDegrees( 180F ) );
+
         RenderSystem.enableRescaleNormal();
-        RenderSystem.scalef( -32.0F, -32.0F, 32.0F );
-        RenderSystem.rotatef( 180.0F, 0.0F, 0.0F, 1.0F );
-        RenderSystem.rotatef( 180.0F, 0.0F, 1.0F, 0.0F );
-        RenderSystem.enableAlphaTest();
-
-        MatrixStack matrixStack = new MatrixStack();
-        head.func_225603_a_( 0.0F, 0.0F, 0.0F );
-        IRenderTypeBuffer.Impl renderTypeBuffer = IRenderTypeBuffer.func_228455_a_( Tessellator.getInstance()
-                                                                                               .getBuffer() );
-        IVertexBuilder ivertexbuilder = renderTypeBuffer.getBuffer( playerSkin );
-        head.func_225598_a_( matrixStack,
-                             ivertexbuilder,
-                             15728880,
-                             OverlayTexture.field_229196_a_,
-                             1.0F,
-                             1.0F,
-                             1.0F,
-                             1.0F );
-
-        matrixStack.func_227865_b_();
-        renderTypeBuffer.func_228461_a_();
-
+        headModel.func_225603_a_( 0.0F, 0.0F, 0.0F );
+        IRenderTypeBuffer.Impl renderTypeBufferImpl = IRenderTypeBuffer.getImpl( Tessellator.getInstance()
+                                                                                            .getBuffer() );
+        IVertexBuilder vertexBuilder = renderTypeBufferImpl.getBuffer( playerSkin );
+        headModel.render( matrixStack, vertexBuilder, 15728880, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F );
+        renderTypeBufferImpl.finish();
+        matrixStack.pop();
+        RenderSystem.matrixMode( 5889 );
+        RenderSystem.viewport( 0,
+                               0,
+                               getMinecraft().getMainWindow().getFramebufferWidth(),
+                               getMinecraft().getMainWindow().getFramebufferHeight() );
         RenderSystem.popMatrix();
-
-        RenderHelper.func_227784_d_();
+        RenderSystem.matrixMode( 5888 );
+        RenderHelper.setupGui3DDiffuseLighting();
+        RenderSystem.color4f( 1.0F, 1.0F, 1.0F, 1.0F );
     }
 
     private void buttonHandle( Button button )
     {
-        if ( activeInput != 0 && activeInput != 1 )
+        if ( activeInput == Input.NULL )
         {
             return;
         }
 
-        String message = button.getMessage();
+        String input = inputTexts.get( activeInput );
+        String message = button.getMessage().getString();
         switch ( message )
         {
             case "0":
-                if ( Objects.equals( input[ activeInput ], "0" ) )
-                {
-                    break;
-                }
-
             case "1":
             case "2":
             case "3":
@@ -195,30 +213,49 @@ public class ExpBottlingMachineScreen
             case "7":
             case "8":
             case "9":
-                input[ activeInput ] += message;
+                if ( Objects.equals( input, "0" ) )
+                {
+                    if ( Objects.equals( message, "0" ) )
+                    {
+                        break;
+                    }
+                    input = message;
+                }
+                else
+                {
+                    input += message;
+                }
                 break;
 
             case "BS":
-                int length = input[ activeInput ].length();
+                int length = input.length();
                 if ( length > 0 )
                 {
-                    input[ activeInput ] = input[ activeInput ].substring( 0, length - 1 );
+                    input = input.substring( 0, length - 1 );
                 }
                 break;
 
             case "Lv":
-                if ( !input[ activeInput ].isEmpty() )
+                if ( !input.isEmpty() )
                 {
-                    int level = Integer.parseInt( input[ activeInput ] );
+                    int level = Math.min( Integer.parseInt( input ), 21863 );
                     int exp = ExperienceUtil.levelToExp( level, 0.0F );
-                    input[ activeInput ] = Integer.toString( Math.max( exp, 0 ) );
+                    input = Integer.toString( Math.max( exp, 0 ) );
                 }
                 break;
         }
 
-        if ( !input[ activeInput ].isEmpty() && Long.parseLong( input[ activeInput ] ) > Integer.MAX_VALUE )
+        if ( !input.isEmpty() && Long.parseLong( input ) > Integer.MAX_VALUE )
         {
-            input[ activeInput ] = Integer.toString( Integer.MAX_VALUE );
+            input = Integer.toString( Integer.MAX_VALUE );
+        }
+
+        inputTexts.put( activeInput, input );
+
+        Input otherInput = ( activeInput == Input.UPPER ) ? Input.LOWER : Input.UPPER;
+        if ( !input.isEmpty() && !inputTexts.get( otherInput ).isEmpty() )
+        {
+            inputTexts.put( otherInput, "" );
         }
 
         sendInputValues();
@@ -226,29 +263,66 @@ public class ExpBottlingMachineScreen
 
     private void sendInputValues()
     {
+        String upperInput = inputTexts.get( Input.UPPER );
+        String lowerInput = inputTexts.get( Input.LOWER );
+
         int value;
-        if ( input[ 0 ].isEmpty() && input[ 1 ].isEmpty() )
+        if ( upperInput.isEmpty() && lowerInput.isEmpty() )
         {
             value = 0;
         }
-        else if ( input[ 0 ].isEmpty() )
+        else if ( upperInput.isEmpty() )
         {
             PlayerEntity player = playerInventory.player;
             int playerExp = ExperienceUtil.getPlayerExp( player );
-            value = playerExp - Integer.parseInt( input[ 1 ] );
+            value = playerExp - Integer.parseInt( lowerInput );
         }
-        else if ( input[ 1 ].isEmpty() )
+        else if ( lowerInput.isEmpty() )
         {
-            value = Integer.parseInt( input[ 0 ] );
+            value = Integer.parseInt( upperInput );
         }
         else
         {
-            int before = Integer.parseInt( input[ 0 ] );
-            int after = Integer.parseInt( input[ 1 ] );
+            int before = Integer.parseInt( upperInput );
+            int after = Integer.parseInt( lowerInput );
             value = after - before;
         }
         container.setBottlingExp( value );
-        Networks.EXP_BOTTLING.sendToServer( new SetBottlingExp( value ) );
+        Networks.getChannel().sendToServer( new SetBottlingExp( value ) );
+    }
+
+    private void drawInputText( MatrixStack matrixStack, Input input, int playerExp )
+    {
+        Input otherInput = ( input == Input.UPPER ) ? Input.LOWER : Input.UPPER;
+
+        String text = inputTexts.get( input );
+        int margin = 0;
+        int color = 0xFFFFFF;
+        if ( activeInput == input )
+        {
+            if ( blinkCount / 6 % 2 == 0 )
+            {
+                text += "_";
+            }
+            else
+            {
+                margin = font.getStringWidth( "_" );
+            }
+        }
+        else
+        {
+            margin = font.getStringWidth( "_" );
+
+            if ( inputTexts.get( input ).isEmpty() && !inputTexts.get( otherInput ).isEmpty() )
+            {
+                int otherInputExp = Integer.parseInt( inputTexts.get( otherInput ) );
+                text = Integer.toString( playerExp - otherInputExp );
+                color = 0xA0A0A0;
+            }
+        }
+
+        int offsetY = input == Input.UPPER ? 49 : 80;
+        drawRightAlignedString( matrixStack, text, 136 - margin, offsetY + getVerticalCenter( 14 ), color );
     }
 
     @Override
@@ -257,104 +331,70 @@ public class ExpBottlingMachineScreen
         super.init();
 
         playerSkin = getPlayerSkin();
-        head = new HumanoidHeadModel();
-        input = new String[] { "", "" };
-        activeInput = -1;
+        headModel = new HumanoidHeadModel();
+        inputTexts = new EnumMap<>( Input.class );
+        activeInput = Input.NULL;
         blinkCount = 0;
 
-        final String[] buttonText = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "Lv", "0", "BS" };
-        for ( int i = 0; i < buttonText.length; i++ )
+        inputTexts.put( Input.UPPER, "" );
+        inputTexts.put( Input.LOWER, "" );
+
+        for ( int i = 0; i < BUTTON_TEXT.length; i++ )
         {
             int x = guiLeft + ( ( i % 3 ) * 21 );
             int y = guiTop + ( ( i / 3 ) * 21 );
-            addButton( new Button( 162 + x, 18 + y, 20, 20, buttonText[ i ], this::buttonHandle ) );
+            addButton( new Button( 162 + x, 18 + y, 20, 20, BUTTON_TEXT[ i ], this::buttonHandle ) );
         }
 
         container.addListener( this );
     }
 
     @Override
-    public void render( int p_render_1_, int p_render_2_, float p_render_3_ )
+    protected void drawGuiContainerForegroundLayer( MatrixStack matrixStack, int mouseX, int mouseY )
     {
-        this.renderBackground();
-        super.render( p_render_1_, p_render_2_, p_render_3_ );
-        this.renderHoveredToolTip( p_render_1_, p_render_2_ );
-    }
-
-    @Override
-    protected void drawGuiContainerForegroundLayer( int mouseX, int mouseY )
-    {
-        drawCenteredString( getTitle().getFormattedText(), 118, 6, 4210752 );
-        drawString( playerInventory.getDisplayName().getFormattedText(), 38, ySize - 92, 4210752 );
+        drawCenteredString( matrixStack, getTitle().getString(), 118, 6, 4210752 );
+        drawString( matrixStack, playerInventory.getDisplayName().getString(), 38, ySize - 92, 4210752 );
 
         PlayerEntity player = playerInventory.player;
         int playerExp = ExperienceUtil.getPlayerExp( player );
         String exp = Integer.toString( playerExp );
-        drawRightAlignedString( exp, 136 - font.getStringWidth( "_" ), 29 + getVerticalCenter( 14 ), 0xFFFFFF );
+        drawRightAlignedString( matrixStack,
+                                exp,
+                                136 - font.getStringWidth( "_" ),
+                                29 + getVerticalCenter( 14 ),
+                                0xFFFFFF );
 
-        String input = this.input[ 0 ];
-        int margin = 0;
-        int color = 0xFFFFFF;
-        if ( activeInput == 0 )
-        {
-            if ( blinkCount / 6 % 2 == 0 )
-            {
-                input += "_";
-            }
-            else
-            {
-                margin = font.getStringWidth( "_" );
-            }
-        }
-        else
-        {
-            margin = font.getStringWidth( "_" );
-
-            if ( this.input[ 0 ].isEmpty() && !this.input[ 1 ].isEmpty() )
-            {
-                int afterExp = Integer.parseInt( this.input[ 1 ] );
-                input = Integer.toString( playerExp - afterExp );
-                color = 0xA0A0A0;
-            }
-        }
-        drawRightAlignedString( input, 136 - margin, 49 + getVerticalCenter( 14 ), color );
-
-        input = this.input[ 1 ];
-        margin = 0;
-        color = 0xFFFFFF;
-        if ( activeInput == 1 )
-        {
-            if ( blinkCount / 6 % 2 == 0 )
-            {
-                input += "_";
-            }
-            else
-            {
-                margin = font.getStringWidth( "_" );
-            }
-        }
-        else
-        {
-            margin = font.getStringWidth( "_" );
-
-            if ( this.input[ 1 ].isEmpty() && !this.input[ 0 ].isEmpty() )
-            {
-                int beforeExp = Integer.parseInt( this.input[ 0 ] );
-                input = Integer.toString( playerExp - beforeExp );
-                color = 0xA0A0A0;
-            }
-        }
-        drawRightAlignedString( input, 136 - margin, 80 + getVerticalCenter( 14 ), color );
+        drawInputText( matrixStack, Input.UPPER, playerExp );
+        drawInputText( matrixStack, Input.LOWER, playerExp );
     }
 
     @Override
-    protected void drawGuiContainerBackgroundLayer( float partialTicks, int mouseX, int mouseY )
+    protected void drawGuiContainerBackgroundLayer( MatrixStack matrixStack,
+                                                    float partialTicks,
+                                                    int mouseX,
+                                                    int mouseY )
     {
+        RenderHelper.setupGuiFlatDiffuseLighting();
         RenderSystem.color4f( 1.0F, 1.0F, 1.0F, 1.0F );
         getMinecraft().getTextureManager().bindTexture( GUI_TEXTURE );
-        blit( guiLeft, guiTop, 0, 0, xSize, ySize );
+        blit( matrixStack, guiLeft, guiTop, 0, 0, xSize, ySize );
 
-        drawPlayerHead( 142, 27 );
+        drawPlayerHead( matrixStack, 142, 27 );
+    }
+
+    @Override
+    public void onClose()
+    {
+        super.onClose();
+        container.removeListener( this );
+    }
+
+    @Override
+    public void render( MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks )
+    {
+        this.renderBackground( matrixStack );
+        super.render( matrixStack, mouseX, mouseY, partialTicks );
+        this.func_230459_a_( matrixStack, mouseX, mouseY );
     }
 
     @Override
@@ -365,38 +405,18 @@ public class ExpBottlingMachineScreen
     }
 
     @Override
-    public boolean mouseReleased( double x, double y, int button )
-    {
-        if ( isInBox( ( int )x, ( int )y, 18, 79, 33, 94 ) )
-        {
-            return true;
-        }
-        return super.mouseReleased( x, y, button );
-    }
-
-    @Override
     public boolean mouseClicked( double x, double y, int button )
     {
-        if ( isInBox( ( int )x, ( int )y, 18, 79, 33, 94 ) )
+        if ( buttons.stream().noneMatch( e -> e.isMouseOver( x, y ) ) )
         {
-            activeInput = -1;
-            ClickType clickType = hasShiftDown() ? ClickType.QUICK_MOVE : ClickType.PICKUP;
-            if ( container.takeBottledExp( button, clickType, playerInventory.player ) )
-            {
-                Networks.EXP_BOTTLING.sendToServer( new TakeBottledExp( button, clickType ) );
-            }
-            return true;
-        }
-        else if ( buttons.stream().noneMatch( e -> e.isMouseOver( x, y ) ) )
-        {
-            activeInput = -1;
+            activeInput = Input.NULL;
             if ( isInBox( ( int )x, ( int )y, 48, 47, 138, 63 ) )
             {
-                activeInput = 0;
+                activeInput = Input.UPPER;
             }
             else if ( isInBox( ( int )x, ( int )y, 48, 78, 138, 94 ) )
             {
-                activeInput = 1;
+                activeInput = Input.LOWER;
             }
         }
         return super.mouseClicked( x, y, button );
@@ -420,5 +440,12 @@ public class ExpBottlingMachineScreen
     @Override
     public void sendWindowProperty( Container containerIn, int varToUpdate, int newValue )
     {
+    }
+
+    private enum Input
+    {
+        NULL,
+        UPPER,
+        LOWER
     }
 }

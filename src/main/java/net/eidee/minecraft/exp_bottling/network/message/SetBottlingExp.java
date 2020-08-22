@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 EideeHi
+ * Copyright (c) 2020 EideeHi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,48 +22,54 @@
  * SOFTWARE.
  */
 
-package net.eidee.minecraft.exp_bottling.tileentity;
+package net.eidee.minecraft.exp_bottling.network.message;
 
-import java.util.Objects;
-import javax.annotation.Nullable;
+import java.util.function.Supplier;
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import mcp.MethodsReturnNonnullByDefault;
 import net.eidee.minecraft.exp_bottling.inventory.container.ExpBottlingMachineContainer;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.IWorldPosCallable;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.PacketBuffer;
+import net.minecraftforge.fml.network.NetworkEvent;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public class ExpBottlingMachineTileEntity
-    extends TileEntity
-    implements INamedContainerProvider
+public class SetBottlingExp
 {
-    public ExpBottlingMachineTileEntity()
+    private int expValue;
+
+    public SetBottlingExp( int expValue )
     {
-        super( TileEntityTypes.EXP_BOTTLING_MACHINE );
+        this.expValue = expValue;
     }
 
-    @Override
-    public ITextComponent getDisplayName()
+    public int getExpValue()
     {
-        return new TranslationTextComponent( "container.exp_bottling.exp_bottling_machine" );
+        return expValue;
     }
 
-    @Nullable
-    @Override
-    public Container createMenu( int id, PlayerInventory playerInventory, PlayerEntity player )
+    public static void encode( SetBottlingExp message, PacketBuffer buffer )
     {
-        World world = Objects.requireNonNull( getWorld() );
-        IWorldPosCallable worldPosCallable = IWorldPosCallable.of( world, getPos() );
-        return new ExpBottlingMachineContainer( id, playerInventory, worldPosCallable );
+        buffer.writeInt( message.expValue );
+    }
+
+    public static SetBottlingExp decode( PacketBuffer buffer )
+    {
+        return new SetBottlingExp( buffer.readInt() );
+    }
+
+    public static void handle( SetBottlingExp message, Supplier< NetworkEvent.Context > ctx )
+    {
+        NetworkEvent.Context _ctx = ctx.get();
+        _ctx.enqueueWork( () -> {
+            ServerPlayerEntity player = _ctx.getSender();
+            if ( player != null && player.openContainer instanceof ExpBottlingMachineContainer )
+            {
+                ( ( ExpBottlingMachineContainer )player.openContainer ).setBottlingExp( message.getExpValue() );
+            }
+        } );
+        _ctx.setPacketHandled( true );
     }
 }

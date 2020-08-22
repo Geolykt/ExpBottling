@@ -26,10 +26,9 @@ package net.eidee.minecraft.exp_bottling;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import net.eidee.minecraft.exp_bottling.network.Networks;
-import net.eidee.minecraft.exp_bottling.registry.BlockRegistry;
-import net.eidee.minecraft.exp_bottling.registry.MessageRegistry;
-import net.eidee.minecraft.exp_bottling.registry.ScreenRegistry;
+import net.eidee.minecraft.exp_bottling.init.BlockInitializer;
+import net.eidee.minecraft.exp_bottling.init.NetworkInitializer;
+import net.eidee.minecraft.exp_bottling.init.ScreenInitializer;
 
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -61,13 +60,12 @@ public class ExpBottling
 
     private void setup( FMLCommonSetupEvent event )
     {
-        Networks.init();
-        MessageRegistry.register();
+        NetworkInitializer.registerMessage();
     }
 
     private void clientSetup( FMLClientSetupEvent event )
     {
-        ScreenRegistry.register();
-        BlockRegistry.renderTypeRegister();
+        ScreenInitializer.registerScreen();
+        BlockInitializer.registerRenderType();
     }
 }
