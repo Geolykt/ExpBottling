@@ -24,15 +24,15 @@
 
 package net.eidee.minecraft.exp_bottling.constants;
 
-import static net.eidee.minecraft.exp_bottling.ExpBottling.MOD_ID;
+import static net.eidee.minecraft.exp_bottling.ExpBottlingMod.MOD_ID;
 
-public class Names
+public class RegistryNames
 {
-    private Names()
-    {
-    }
-
     public static final String EXP_BOTTLING_MACHINE = ( MOD_ID + ":exp_bottling_machine" );
 
     public static final String BOTTLED_EXP = ( MOD_ID + ":bottled_exp" );
+
+    private RegistryNames()
+    {
+    }
 }

@@ -24,7 +24,7 @@
 
 package net.eidee.minecraft.exp_bottling.item;
 
-import net.eidee.minecraft.exp_bottling.constants.Names;
+import net.eidee.minecraft.exp_bottling.constants.RegistryNames;
 
 import net.minecraft.item.Item;
 import net.minecraftforge.registries.ObjectHolder;
@@ -36,6 +36,6 @@ public class Items
     }
 
 
-    @ObjectHolder( Names.BOTTLED_EXP )
+    @ObjectHolder( RegistryNames.BOTTLED_EXP )
     public static Item BOTTLED_EXP;
 }

@@ -24,10 +24,10 @@
 
 package net.eidee.minecraft.exp_bottling.init;
 
-import net.eidee.minecraft.exp_bottling.ExpBottling;
+import net.eidee.minecraft.exp_bottling.ExpBottlingMod;
 import net.eidee.minecraft.exp_bottling.block.Blocks;
 import net.eidee.minecraft.exp_bottling.block.ExpBottlingMachineBlock;
-import net.eidee.minecraft.exp_bottling.constants.Names;
+import net.eidee.minecraft.exp_bottling.constants.RegistryNames;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -43,7 +43,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.IForgeRegistry;
 
-@Mod.EventBusSubscriber( modid = ExpBottling.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD )
+@Mod.EventBusSubscriber( modid = ExpBottlingMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD )
 public class BlockInitializer
 {
     @SubscribeEvent
@@ -57,7 +57,7 @@ public class BlockInitializer
             prop = Block.Properties.create( Material.IRON )
                                    .hardnessAndResistance( 3.0F )
                                    .doesNotBlockMovement();
-            block = new ExpBottlingMachineBlock( prop ).setRegistryName( Names.EXP_BOTTLING_MACHINE );
+            block = new ExpBottlingMachineBlock( prop ).setRegistryName( RegistryNames.EXP_BOTTLING_MACHINE );
             registry.register( block );
         }
     }
@@ -72,7 +72,7 @@ public class BlockInitializer
         {
             prop = new Item.Properties().group( ItemGroup.DECORATIONS );
 
-            item = new BlockItem( Blocks.EXP_BOTTLING_MACHINE, prop ).setRegistryName( Names.EXP_BOTTLING_MACHINE );
+            item = new BlockItem( Blocks.EXP_BOTTLING_MACHINE, prop ).setRegistryName( RegistryNames.EXP_BOTTLING_MACHINE );
             registry.register( item );
         }
     }

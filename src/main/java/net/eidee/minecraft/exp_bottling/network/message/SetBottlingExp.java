@@ -38,7 +38,7 @@ import net.minecraftforge.fml.network.NetworkEvent;
 @ParametersAreNonnullByDefault
 public class SetBottlingExp
 {
-    private int expValue;
+    private final int expValue;
 
     public SetBottlingExp( int expValue )
     {

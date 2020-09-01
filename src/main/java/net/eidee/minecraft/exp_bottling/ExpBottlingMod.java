@@ -35,8 +35,8 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-@Mod( ExpBottling.MOD_ID )
-public class ExpBottling
+@Mod( ExpBottlingMod.MOD_ID )
+public class ExpBottlingMod
 {
     private static final Logger logger;
 
@@ -47,7 +47,7 @@ public class ExpBottling
         logger = LogManager.getLogger( MOD_ID );
     }
 
-    public ExpBottling()
+    public ExpBottlingMod()
     {
         FMLJavaModLoadingContext.get().getModEventBus().addListener( this::setup );
         FMLJavaModLoadingContext.get().getModEventBus().addListener( this::clientSetup );

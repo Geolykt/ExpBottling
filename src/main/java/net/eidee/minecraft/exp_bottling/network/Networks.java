@@ -24,7 +24,7 @@
 
 package net.eidee.minecraft.exp_bottling.network;
 
-import static net.eidee.minecraft.exp_bottling.ExpBottling.MOD_ID;
+import static net.eidee.minecraft.exp_bottling.ExpBottlingMod.MOD_ID;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.network.NetworkRegistry;

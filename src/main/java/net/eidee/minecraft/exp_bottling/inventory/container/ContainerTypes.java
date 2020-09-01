@@ -24,7 +24,7 @@
 
 package net.eidee.minecraft.exp_bottling.inventory.container;
 
-import net.eidee.minecraft.exp_bottling.constants.Names;
+import net.eidee.minecraft.exp_bottling.constants.RegistryNames;
 
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraftforge.registries.ObjectHolder;
@@ -35,7 +35,7 @@ public class ContainerTypes
     {
     }
 
-    @ObjectHolder( Names.EXP_BOTTLING_MACHINE )
+    @ObjectHolder( RegistryNames.EXP_BOTTLING_MACHINE )
     public static ContainerType< ExpBottlingMachineContainer > EXP_BOTTLING_MACHINE;
 
 }

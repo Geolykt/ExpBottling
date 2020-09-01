@@ -24,7 +24,7 @@
 
 package net.eidee.minecraft.exp_bottling.gui;
 
-import static net.eidee.minecraft.exp_bottling.ExpBottling.MOD_ID;
+import static net.eidee.minecraft.exp_bottling.ExpBottlingMod.MOD_ID;
 
 import java.util.EnumMap;
 import java.util.Map;

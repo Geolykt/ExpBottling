@@ -24,8 +24,8 @@
 
 package net.eidee.minecraft.exp_bottling.init;
 
-import net.eidee.minecraft.exp_bottling.ExpBottling;
-import net.eidee.minecraft.exp_bottling.constants.Names;
+import net.eidee.minecraft.exp_bottling.ExpBottlingMod;
+import net.eidee.minecraft.exp_bottling.constants.RegistryNames;
 import net.eidee.minecraft.exp_bottling.item.BottledExpItem;
 
 import net.minecraft.item.Item;
@@ -35,7 +35,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.IForgeRegistry;
 
-@Mod.EventBusSubscriber( modid = ExpBottling.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD )
+@Mod.EventBusSubscriber( modid = ExpBottlingMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD )
 public class ItemInitializer
 {
     @SubscribeEvent
@@ -48,7 +48,7 @@ public class ItemInitializer
         {
             prop = new Item.Properties().group( ItemGroup.MISC );
 
-            item = new BottledExpItem( prop ).setRegistryName( Names.BOTTLED_EXP );
+            item = new BottledExpItem( prop ).setRegistryName( RegistryNames.BOTTLED_EXP );
             registry.register( item );
         }
     }
