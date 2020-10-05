@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Objects;
 import javax.annotation.ParametersAreNonnullByDefault;
 
+import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -45,6 +46,7 @@ import net.eidee.minecraft.exp_bottling.util.ExperienceUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderHelper;
@@ -62,10 +64,11 @@ import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -77,24 +80,10 @@ public class ExpBottlingMachineScreen
     implements IContainerListener
 {
     private static final ResourceLocation GUI_TEXTURE;
-    private static final ITextComponent[] BUTTON_TEXT;
 
     static
     {
         GUI_TEXTURE = new ResourceLocation( MOD_ID, "textures/gui/container/exp_bottling_machine.png" );
-        BUTTON_TEXT = new ITextComponent[] { new StringTextComponent( "1" ),
-                                             new StringTextComponent( "2" ),
-                                             new StringTextComponent( "3" ),
-                                             new StringTextComponent( "4" ),
-                                             new StringTextComponent( "5" ),
-                                             new StringTextComponent( "6" ),
-                                             new StringTextComponent( "7" ),
-                                             new StringTextComponent( "8" ),
-                                             new StringTextComponent( "9" ),
-                                             new StringTextComponent( "Lv" ),
-                                             new StringTextComponent( "0" ),
-                                             new StringTextComponent( "BS" )
-        };
     }
 
     private RenderType playerSkin;
@@ -102,6 +91,7 @@ public class ExpBottlingMachineScreen
     private EnumMap< Input, String > inputTexts;
     private Input activeInput;
     private int blinkCount;
+    private Map< Widget, ButtonLogic > buttonToLogicMap;
 
     public ExpBottlingMachineScreen( ExpBottlingMachineContainer screenContainer,
                                      PlayerInventory inv,
@@ -110,6 +100,7 @@ public class ExpBottlingMachineScreen
         super( screenContainer, inv, titleIn );
         xSize = 236;
         ySize = 204;
+        buttonToLogicMap = Maps.newHashMap();
     }
 
     private RenderType getPlayerSkin()
@@ -199,51 +190,7 @@ public class ExpBottlingMachineScreen
             return;
         }
 
-        String input = inputTexts.get( activeInput );
-        String message = button.getMessage().getString();
-        switch ( message )
-        {
-            case "0":
-            case "1":
-            case "2":
-            case "3":
-            case "4":
-            case "5":
-            case "6":
-            case "7":
-            case "8":
-            case "9":
-                if ( Objects.equals( input, "0" ) )
-                {
-                    if ( Objects.equals( message, "0" ) )
-                    {
-                        break;
-                    }
-                    input = message;
-                }
-                else
-                {
-                    input += message;
-                }
-                break;
-
-            case "BS":
-                int length = input.length();
-                if ( length > 0 )
-                {
-                    input = input.substring( 0, length - 1 );
-                }
-                break;
-
-            case "Lv":
-                if ( !input.isEmpty() )
-                {
-                    int level = Math.min( Integer.parseInt( input ), 21863 );
-                    int exp = ExperienceUtil.levelToExp( level, 0.0F );
-                    input = Integer.toString( Math.max( exp, 0 ) );
-                }
-                break;
-        }
+        String input = buttonToLogicMap.get( button ).handleInput( inputTexts.get( activeInput ) );
 
         if ( !input.isEmpty() && Long.parseLong( input ) > Integer.MAX_VALUE )
         {
@@ -335,15 +282,18 @@ public class ExpBottlingMachineScreen
         inputTexts = new EnumMap<>( Input.class );
         activeInput = Input.NULL;
         blinkCount = 0;
+        buttonToLogicMap.clear();
 
         inputTexts.put( Input.UPPER, "" );
         inputTexts.put( Input.LOWER, "" );
 
-        for ( int i = 0; i < BUTTON_TEXT.length; i++ )
+        for ( ButtonLogic data : ButtonLogic.values() )
         {
+            int i = data.getSortOrder();
             int x = guiLeft + ( ( i % 3 ) * 21 );
             int y = guiTop + ( ( i / 3 ) * 21 );
-            addButton( new Button( 162 + x, 18 + y, 20, 20, BUTTON_TEXT[ i ], this::buttonHandle ) );
+            Button button = addButton( new Button( 162 + x, 18 + y, 20, 20, data.getText(), this::buttonHandle ) );
+            buttonToLogicMap.put( button, data );
         }
 
         container.addListener( this );
@@ -447,5 +397,136 @@ public class ExpBottlingMachineScreen
         NULL,
         UPPER,
         LOWER
+    }
+
+    private enum ButtonLogic
+    {
+        NUMBER_1( 0, "gui.exp_bottling.exp_bottling_machine.button.1" )
+            {
+                @Override
+                public String handleInput( String input )
+                {
+                    return Objects.equals( input, "0" ) ? "1" : input + "1";
+                }
+            },
+        NUMBER_2( 1, "gui.exp_bottling.exp_bottling_machine.button.2" )
+            {
+                @Override
+                public String handleInput( String input )
+                {
+                    return Objects.equals( input, "0" ) ? "2" : input + "2";
+                }
+            },
+        NUMBER_3( 2, "gui.exp_bottling.exp_bottling_machine.button.3" )
+            {
+                @Override
+                public String handleInput( String input )
+                {
+                    return Objects.equals( input, "0" ) ? "3" : input + "3";
+                }
+            },
+        NUMBER_4( 3, "gui.exp_bottling.exp_bottling_machine.button.4" )
+            {
+                @Override
+                public String handleInput( String input )
+                {
+                    return Objects.equals( input, "0" ) ? "4" : input + "4";
+                }
+            },
+        NUMBER_5( 4, "gui.exp_bottling.exp_bottling_machine.button.5" )
+            {
+                @Override
+                public String handleInput( String input )
+                {
+                    return Objects.equals( input, "0" ) ? "5" : input + "5";
+                }
+            },
+        NUMBER_6( 5, "gui.exp_bottling.exp_bottling_machine.button.6" )
+            {
+                @Override
+                public String handleInput( String input )
+                {
+                    return Objects.equals( input, "0" ) ? "6" : input + "6";
+                }
+            },
+        NUMBER_7( 6, "gui.exp_bottling.exp_bottling_machine.button.7" )
+            {
+                @Override
+                public String handleInput( String input )
+                {
+                    return Objects.equals( input, "0" ) ? "7" : input + "7";
+                }
+            },
+        NUMBER_8( 7, "gui.exp_bottling.exp_bottling_machine.button.8" )
+            {
+                @Override
+                public String handleInput( String input )
+                {
+                    return Objects.equals( input, "0" ) ? "8" : input + "8";
+                }
+            },
+        NUMBER_9( 8, "gui.exp_bottling.exp_bottling_machine.button.9" )
+            {
+                @Override
+                public String handleInput( String input )
+                {
+                    return Objects.equals( input, "0" ) ? "9" : input + "9";
+                }
+            },
+        NUMBER_0( 10, "gui.exp_bottling.exp_bottling_machine.button.0" )
+            {
+                @Override
+                public String handleInput( String input )
+                {
+                    return Objects.equals( input, "0" ) ? input : input + "0";
+                }
+            },
+        LEVEL( 9, "gui.exp_bottling.exp_bottling_machine.button.lv" )
+            {
+                @Override
+                public String handleInput( String input )
+                {
+                    if ( !input.isEmpty() )
+                    {
+                        int level = MathHelper.clamp( Integer.parseInt( input ), 0, 21863 );
+                        if ( level > 0 )
+                        {
+                            int exp = ExperienceUtil.levelToExp( level, 0.0F );
+                            return Integer.toString( Math.max( exp, 0 ) );
+                        }
+                    }
+                    return "";
+                }
+            },
+        BACKSPACE( 11, "gui.exp_bottling.exp_bottling_machine.button.bs" )
+            {
+                @Override
+                public String handleInput( String input )
+                {
+                    int length = input.length();
+                    return length > 0 ? input.substring( 0, length - 1 ) : "";
+                }
+            };
+
+        private final int sortOrder;
+        private final ITextComponent text;
+
+        ButtonLogic( int sortOrder, String text )
+        {
+            this.sortOrder = sortOrder;
+            this.text = new TranslationTextComponent( text );
+        }
+
+        public int getSortOrder()
+        {
+            return sortOrder;
+        }
+
+        public ITextComponent getText()
+        {
+            return text;
+        }
+
+        public abstract String handleInput( String input );
     }
 }
