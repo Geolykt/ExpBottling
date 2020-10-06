@@ -1,2 +1,2 @@
-- 1.16.3-3
-  * Add pt_br language file. Author: Mikeliro
+- 1.16.3-4
+  * The string displayed on the de_de language BS button has been changed to '←'. By Geolykt
