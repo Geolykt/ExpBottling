@@ -1,0 +1,2 @@
+- 1.16.3-3
+  * Add pt_br language file. Author: Mikeliro

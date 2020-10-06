@@ -21,7 +21,9 @@ Bottled experience can stack up to 64.
 |ja_jp|EideeHi|Complete|
 |zh_cn|Aikini|Complete|
 |de_de|Geolykt|Complete|
+|pt_br|Mikeliro|Complete|
 
 ## Credits ##
 - Aikini
 - Geolykt
+- Mikeliro

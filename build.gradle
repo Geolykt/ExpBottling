@@ -16,7 +16,7 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'com.matthewprenger.cursegradle'
 
-version = '1.16.3-2'
+version = '1.16.3-3'
 group = 'net.eidee.minecraft.exp_bottling' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'exp_bottling'
 
