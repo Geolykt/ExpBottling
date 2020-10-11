@@ -1,2 +1,3 @@
-- 1.16.3-4
-  * The string displayed on the de_de language BS button has been changed to '←'. By Geolykt
+- 1.16.3-5
+  * Geolykt: Allow for Keyboard input for the Input in the GUI (#5)
+  * EideeHi: A rework of pull request (#5).
