@@ -26,10 +26,12 @@ package net.eidee.minecraft.exp_bottling;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import net.eidee.minecraft.exp_bottling.gui.ContainerKeyInput;
 import net.eidee.minecraft.exp_bottling.init.BlockInitializer;
 import net.eidee.minecraft.exp_bottling.init.NetworkInitializer;
 import net.eidee.minecraft.exp_bottling.init.ScreenInitializer;
-
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -67,5 +69,6 @@ public class ExpBottlingMod
     {
         ScreenInitializer.registerScreen();
         BlockInitializer.registerRenderType();
+        MinecraftForge.EVENT_BUS.register(ContainerKeyInput.class);
     }
 }
