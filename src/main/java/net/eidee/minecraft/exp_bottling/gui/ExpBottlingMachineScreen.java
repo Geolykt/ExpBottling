@@ -92,6 +92,8 @@ public class ExpBottlingMachineScreen
     private Input activeInput;
     private int blinkCount;
     private Map< Widget, ButtonLogic > buttonToLogicMap;
+    
+    protected long inputTime = 0;
 
     public ExpBottlingMachineScreen( ExpBottlingMachineContainer screenContainer,
                                      PlayerInventory inv,
@@ -183,14 +185,13 @@ public class ExpBottlingMachineScreen
         RenderSystem.color4f( 1.0F, 1.0F, 1.0F, 1.0F );
     }
 
-    private void buttonHandle( Button button )
-    {
+    protected void stimulateInput (ButtonLogic pressed) {
         if ( activeInput == Input.NULL )
         {
             return;
         }
 
-        String input = buttonToLogicMap.get( button ).handleInput( inputTexts.get( activeInput ) );
+        String input = pressed.handleInput( inputTexts.get( activeInput ) );
 
         if ( !input.isEmpty() && Long.parseLong( input ) > Integer.MAX_VALUE )
         {
@@ -206,6 +207,11 @@ public class ExpBottlingMachineScreen
         }
 
         sendInputValues();
+    }
+    
+    private void buttonHandle( Button button )
+    {
+        stimulateInput(buttonToLogicMap.get( button ));
     }
 
     private void sendInputValues()
@@ -399,7 +405,7 @@ public class ExpBottlingMachineScreen
         LOWER
     }
 
-    private enum ButtonLogic
+    protected enum ButtonLogic
     {
         NUMBER_1( 0, "gui.exp_bottling.exp_bottling_machine.button.1" )
             {
