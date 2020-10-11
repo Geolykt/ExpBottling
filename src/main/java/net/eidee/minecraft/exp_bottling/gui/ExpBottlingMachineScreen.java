@@ -31,7 +31,8 @@ import java.util.Map;
 import java.util.Objects;
 import javax.annotation.ParametersAreNonnullByDefault;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -46,7 +47,6 @@ import net.eidee.minecraft.exp_bottling.util.ExperienceUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderHelper;
@@ -57,6 +57,7 @@ import net.minecraft.client.renderer.entity.model.HumanoidHeadModel;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.resources.DefaultPlayerSkin;
 import net.minecraft.client.resources.SkinManager;
+import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
@@ -91,9 +92,7 @@ public class ExpBottlingMachineScreen
     private EnumMap< Input, String > inputTexts;
     private Input activeInput;
     private int blinkCount;
-    private Map< Widget, ButtonLogic > buttonToLogicMap;
-    
-    protected long inputTime = 0;
+    private BiMap< ButtonLogic, Button > logicToButtonMap;
 
     public ExpBottlingMachineScreen( ExpBottlingMachineContainer screenContainer,
                                      PlayerInventory inv,
@@ -102,7 +101,7 @@ public class ExpBottlingMachineScreen
         super( screenContainer, inv, titleIn );
         xSize = 236;
         ySize = 204;
-        buttonToLogicMap = Maps.newHashMap();
+        logicToButtonMap = HashBiMap.create();
     }
 
     private RenderType getPlayerSkin()
@@ -185,13 +184,19 @@ public class ExpBottlingMachineScreen
         RenderSystem.color4f( 1.0F, 1.0F, 1.0F, 1.0F );
     }
 
-    protected void stimulateInput (ButtonLogic pressed) {
+    private void buttonHandle( Button button )
+    {
+        stimulateInput( logicToButtonMap.inverse().get( button ) );
+    }
+
+    private void stimulateInput( ButtonLogic logic )
+    {
         if ( activeInput == Input.NULL )
         {
             return;
         }
 
-        String input = pressed.handleInput( inputTexts.get( activeInput ) );
+        String input = logic.handleInput( inputTexts.get( activeInput ) );
 
         if ( !input.isEmpty() && Long.parseLong( input ) > Integer.MAX_VALUE )
         {
@@ -207,11 +212,6 @@ public class ExpBottlingMachineScreen
         }
 
         sendInputValues();
-    }
-    
-    private void buttonHandle( Button button )
-    {
-        stimulateInput(buttonToLogicMap.get( button ));
     }
 
     private void sendInputValues()
@@ -288,18 +288,18 @@ public class ExpBottlingMachineScreen
         inputTexts = new EnumMap<>( Input.class );
         activeInput = Input.NULL;
         blinkCount = 0;
-        buttonToLogicMap.clear();
+        logicToButtonMap.clear();
 
         inputTexts.put( Input.UPPER, "" );
         inputTexts.put( Input.LOWER, "" );
 
-        for ( ButtonLogic data : ButtonLogic.values() )
+        for ( ButtonLogic logic : ButtonLogic.values() )
         {
-            int i = data.getSortOrder();
+            int i = logic.getSortOrder();
             int x = guiLeft + ( ( i % 3 ) * 21 );
             int y = guiTop + ( ( i / 3 ) * 21 );
-            Button button = addButton( new Button( 162 + x, 18 + y, 20, 20, data.getText(), this::buttonHandle ) );
-            buttonToLogicMap.put( button, data );
+            Button button = addButton( new Button( 162 + x, 18 + y, 20, 20, logic.getText(), this::buttonHandle ) );
+            logicToButtonMap.put( logic, button );
         }
 
         container.addListener( this );
@@ -379,6 +379,81 @@ public class ExpBottlingMachineScreen
     }
 
     @Override
+    public boolean keyPressed( int keyCode, int scanCode, int modifiers )
+    {
+        if ( super.keyPressed( keyCode, scanCode, modifiers ) )
+        {
+            return true;
+        }
+
+        switch ( InputMappings.getInputByCode( keyCode, scanCode ).getTranslationKey() )
+        {
+            case "key.keyboard.0":
+            case "key.keyboard.keypad.0":
+                stimulateInput( ButtonLogic.NUMBER_0 );
+                break;
+
+            case "key.keyboard.1":
+            case "key.keyboard.keypad.1":
+                stimulateInput( ButtonLogic.NUMBER_1 );
+                break;
+
+            case "key.keyboard.2":
+            case "key.keyboard.keypad.2":
+                stimulateInput( ButtonLogic.NUMBER_2 );
+                break;
+
+            case "key.keyboard.3":
+            case "key.keyboard.keypad.3":
+                stimulateInput( ButtonLogic.NUMBER_3 );
+                break;
+
+            case "key.keyboard.4":
+            case "key.keyboard.keypad.4":
+                stimulateInput( ButtonLogic.NUMBER_4 );
+                break;
+
+            case "key.keyboard.5":
+            case "key.keyboard.keypad.5":
+                stimulateInput( ButtonLogic.NUMBER_5 );
+                break;
+
+            case "key.keyboard.6":
+            case "key.keyboard.keypad.6":
+                stimulateInput( ButtonLogic.NUMBER_6 );
+                break;
+
+            case "key.keyboard.7":
+            case "key.keyboard.keypad.7":
+                stimulateInput( ButtonLogic.NUMBER_7 );
+                break;
+
+            case "key.keyboard.8":
+            case "key.keyboard.keypad.8":
+                stimulateInput( ButtonLogic.NUMBER_8 );
+                break;
+
+            case "key.keyboard.9":
+            case "key.keyboard.keypad.9":
+                stimulateInput( ButtonLogic.NUMBER_9 );
+                break;
+
+            case "key.keyboard.backspace":
+                stimulateInput( ButtonLogic.BACKSPACE );
+                break;
+
+            case "key.keyboard.l":
+                stimulateInput( ButtonLogic.LEVEL );
+                break;
+
+            default:
+                break;
+        }
+
+        return true;
+    }
+
+    @Override
     public void sendAllContents( Container containerToSend, NonNullList< ItemStack > itemsList )
     {
         sendSlotContents( containerToSend, 0, containerToSend.getSlot( 0 ).getStack() );
@@ -405,7 +480,7 @@ public class ExpBottlingMachineScreen
         LOWER
     }
 
-    protected enum ButtonLogic
+    private enum ButtonLogic
     {
         NUMBER_1( 0, "gui.exp_bottling.exp_bottling_machine.button.1" )
             {
