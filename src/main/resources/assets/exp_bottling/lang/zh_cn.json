@@ -20,6 +20,6 @@
   "gui.exp_bottling.exp_bottling_machine.button.7": "7",
   "gui.exp_bottling.exp_bottling_machine.button.8": "8",
   "gui.exp_bottling.exp_bottling_machine.button.9": "9",
-  "gui.exp_bottling.exp_bottling_machine.button.lv": "Lv",
-  "gui.exp_bottling.exp_bottling_machine.button.bs": "BS"
+  "gui.exp_bottling.exp_bottling_machine.button.lv": "等级",
+  "gui.exp_bottling.exp_bottling_machine.button.bs": "退格"
 }
