@@ -1,6 +1,10 @@
 {
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/exp-bottling",
   "promos": {
+  	"1.16.4-latest": "1.16.4-1",
+  	"1.16.4-recommended": "1.16.4-1",
+  	"1.16.3-latest": "1.16.3-5",
+  	"1.16.3-recommended": "1.16.3-5",
     "1.16.2-latest": "1.16.2-1",
     "1.16.2-recommended": "1.16.2-1",
     "1.15.2-latest": "1.15.2-1",
@@ -11,6 +15,16 @@
     "1.14.4-recommended": "1.14.4-2",
     "1.12.2-latest": "1.12.2-3",
     "1.12.2-recommended": "1.12.2-2"
+  },
+  "1.16.4": {
+  	"1.16.4-1": "Support for version 1.16.4 (Geolykt)"
+  },
+  "1.16.3": {
+  	"1.16.3-1": "Support for version 1.16.3 (EideeHi)",
+  	"1.16.3-2": "Translated into german (Geolykt)",
+  	"1.16.3-3": "Translated into brazillian portuguese (Mikeliro)",
+  	"1.16.3-4": "Changed the backslash character of the german locale (Geolykt)",
+  	"1.16.3-5": "Allow for keyboard input (Geolykt, EideeHi)"
   },
   "1.16.2": {
     "1.16.2-1": "Support for version 1.16.2"
