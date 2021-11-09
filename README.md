@@ -1,6 +1,6 @@
 <img src="https://app.box.com/shared/static/nkf60gaxe5frw4vv4q99888mkhovpnp2.png" width="200" alt="Exp Bottling"/>
 
-## EXP Bottling - 1.16.3 ##
+## EXP Bottling - 1.17.1 ##
 Add block that can you to bottling experience values.
 
 ## Outline ##

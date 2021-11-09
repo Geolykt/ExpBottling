@@ -1,3 +1,0 @@
-- 1.16.3-5
-  * Geolykt: Allow for Keyboard input for the Input in the GUI (#5)
-  * EideeHi: A rework of pull request (#5).
