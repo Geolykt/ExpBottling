@@ -24,48 +24,42 @@
 
 package net.eidee.minecraft.exp_bottling;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import net.eidee.minecraft.exp_bottling.init.BlockInitializer;
-import net.eidee.minecraft.exp_bottling.init.NetworkInitializer;
-import net.eidee.minecraft.exp_bottling.init.ScreenInitializer;
-
+import net.eidee.minecraft.exp_bottling.core.init.BlockInitializer;
+import net.eidee.minecraft.exp_bottling.core.init.NetworkInitializer;
+import net.eidee.minecraft.exp_bottling.core.init.ScreenInitializer;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-@Mod( ExpBottlingMod.MOD_ID )
-public class ExpBottlingMod
-{
-    private static final Logger logger;
+/** The main class of the mod. */
+@Mod(ExpBottlingMod.MOD_ID)
+public class ExpBottlingMod {
+  private static final Logger logger;
 
-    public static final String MOD_ID = "exp_bottling";
+  public static final String MOD_ID = "exp_bottling";
 
-    static
-    {
-        logger = LogManager.getLogger( MOD_ID );
-    }
+  static {
+    logger = LogManager.getLogger(MOD_ID);
+  }
 
-    public ExpBottlingMod()
-    {
-        FMLJavaModLoadingContext.get().getModEventBus().addListener( this::setup );
-        FMLJavaModLoadingContext.get().getModEventBus().addListener( this::clientSetup );
-    }
+  public ExpBottlingMod() {
+    FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+    FMLJavaModLoadingContext.get().getModEventBus().addListener(this::clientSetup);
+  }
 
-    public static Logger logger()
-    {
-        return logger;
-    }
+  public static Logger logger() {
+    return logger;
+  }
 
-    private void setup( FMLCommonSetupEvent event )
-    {
-        NetworkInitializer.registerMessage();
-    }
+  private void setup(FMLCommonSetupEvent event) {
+    NetworkInitializer.registerMessage();
+  }
 
-    private void clientSetup( FMLClientSetupEvent event )
-    {
-        ScreenInitializer.registerScreen();
-        BlockInitializer.registerRenderType();
-    }
+  private void clientSetup(FMLClientSetupEvent event) {
+    ScreenInitializer.registerScreen();
+    BlockInitializer.registerRenderType();
+  }
 }

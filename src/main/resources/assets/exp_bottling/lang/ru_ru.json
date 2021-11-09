@@ -4,7 +4,7 @@
 
   "_comment": "Items",
   "item.exp_bottling.bottled_exp": "Опыт в бутылочке",
-  "item.exp_bottling.bottled_exp.tooltip.0": "Опыт: %,d",
+  "item.exp_bottling.bottled_exp.tooltip.0": "Опыт: %s",
 
   "_comment": "Container",
   "container.exp_bottling.exp_bottling_machine": "Разливщик опыта",

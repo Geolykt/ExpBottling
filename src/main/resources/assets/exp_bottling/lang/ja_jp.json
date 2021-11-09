@@ -4,7 +4,7 @@
 
   "_comment": "Items",
   "item.exp_bottling.bottled_exp": "瓶詰めの経験値",
-  "item.exp_bottling.bottled_exp.tooltip.0": "経験値: %,d",
+  "item.exp_bottling.bottled_exp.tooltip.0": "経験値: %s",
 
   "_comment": "Container",
   "container.exp_bottling.exp_bottling_machine": "経験値瓶詰め機",

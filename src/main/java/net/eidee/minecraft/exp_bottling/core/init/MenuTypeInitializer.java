@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 EideeHi
+ * Copyright (c) 2020 EideeHi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,17 +22,27 @@
  * SOFTWARE.
  */
 
-package net.eidee.minecraft.exp_bottling.constants;
+package net.eidee.minecraft.exp_bottling.core.init;
 
-import static net.eidee.minecraft.exp_bottling.ExpBottlingMod.MOD_ID;
+import net.eidee.minecraft.exp_bottling.ExpBottlingMod;
+import net.eidee.minecraft.exp_bottling.core.constants.Identifies;
+import net.eidee.minecraft.exp_bottling.world.inventory.ExpBottlingMachineMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.IForgeRegistry;
 
-public class RegistryNames
-{
-    public static final String EXP_BOTTLING_MACHINE = ( MOD_ID + ":exp_bottling_machine" );
+@Mod.EventBusSubscriber(modid = ExpBottlingMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+public class MenuTypeInitializer {
+  @SubscribeEvent
+  public static void registerContainerType(RegistryEvent.Register<MenuType<?>> event) {
+    IForgeRegistry<MenuType<?>> registry = event.getRegistry();
+    MenuType<?> menuType;
 
-    public static final String BOTTLED_EXP = ( MOD_ID + ":bottled_exp" );
-
-    private RegistryNames()
-    {
-    }
+    menuType =
+        new MenuType<>(ExpBottlingMachineMenu::new)
+            .setRegistryName(Identifies.EXP_BOTTLING_MACHINE);
+    registry.register(menuType);
+  }
 }

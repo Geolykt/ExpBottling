@@ -22,29 +22,17 @@
  * SOFTWARE.
  */
 
-package net.eidee.minecraft.exp_bottling.init;
+package net.eidee.minecraft.exp_bottling.core.init;
 
-import net.eidee.minecraft.exp_bottling.ExpBottlingMod;
-import net.eidee.minecraft.exp_bottling.constants.RegistryNames;
-import net.eidee.minecraft.exp_bottling.inventory.container.ExpBottlingMachineContainer;
+import net.eidee.minecraft.exp_bottling.client.gui.ExpBottlingMachineScreen;
+import net.eidee.minecraft.exp_bottling.world.inventory.MenuTypes;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.IForgeRegistry;
-
-@Mod.EventBusSubscriber( modid = ExpBottlingMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD )
-public class ContainerTypeInitializer
-{
-    @SubscribeEvent
-    public static void registerContainerType( RegistryEvent.Register< ContainerType< ? > > event )
-    {
-        IForgeRegistry< ContainerType< ? > > registry = event.getRegistry();
-        ContainerType< ? > containerType;
-        {
-            containerType = new ContainerType<>( ExpBottlingMachineContainer::new ).setRegistryName( RegistryNames.EXP_BOTTLING_MACHINE );
-            registry.register( containerType );
-        }
-    }
+@OnlyIn(Dist.CLIENT)
+public class ScreenInitializer {
+  public static void registerScreen() {
+    MenuScreens.register(MenuTypes.EXP_BOTTLING_MACHINE, ExpBottlingMachineScreen::new);
+  }
 }

@@ -26,50 +26,33 @@ package net.eidee.minecraft.exp_bottling.network.message;
 
 import java.util.function.Supplier;
 import javax.annotation.ParametersAreNonnullByDefault;
-
-import mcp.MethodsReturnNonnullByDefault;
-import net.eidee.minecraft.exp_bottling.inventory.container.ExpBottlingMachineContainer;
-
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
+import net.eidee.minecraft.exp_bottling.world.inventory.ExpBottlingMachineMenu;
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.fmllegacy.network.NetworkEvent;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
-public class SetBottlingExp
-{
-    private final int expValue;
+public record SetExpToBeBottled(int exp) {
 
-    public SetBottlingExp( int expValue )
-    {
-        this.expValue = expValue;
-    }
+  public static void encode(SetExpToBeBottled message, FriendlyByteBuf buffer) {
+    buffer.writeInt(message.exp);
+  }
 
-    public int getExpValue()
-    {
-        return expValue;
-    }
+  public static SetExpToBeBottled decode(FriendlyByteBuf buffer) {
+    return new SetExpToBeBottled(buffer.readInt());
+  }
 
-    public static void encode( SetBottlingExp message, PacketBuffer buffer )
-    {
-        buffer.writeInt( message.expValue );
-    }
-
-    public static SetBottlingExp decode( PacketBuffer buffer )
-    {
-        return new SetBottlingExp( buffer.readInt() );
-    }
-
-    public static void handle( SetBottlingExp message, Supplier< NetworkEvent.Context > ctx )
-    {
-        NetworkEvent.Context _ctx = ctx.get();
-        _ctx.enqueueWork( () -> {
-            ServerPlayerEntity player = _ctx.getSender();
-            if ( player != null && player.openContainer instanceof ExpBottlingMachineContainer )
-            {
-                ( ( ExpBottlingMachineContainer )player.openContainer ).setBottlingExp( message.getExpValue() );
-            }
-        } );
-        _ctx.setPacketHandled( true );
-    }
+  public static void handle(SetExpToBeBottled message, Supplier<NetworkEvent.Context> supplier) {
+    NetworkEvent.Context ctx = supplier.get();
+    ctx.enqueueWork(
+        () -> {
+          ServerPlayer player = ctx.getSender();
+          if (player != null && player.containerMenu instanceof ExpBottlingMachineMenu menu) {
+            menu.setExpToBeBottled(message.exp);
+          }
+        });
+    ctx.setPacketHandled(true);
+  }
 }

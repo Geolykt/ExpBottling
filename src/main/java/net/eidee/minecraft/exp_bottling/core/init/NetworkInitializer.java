@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 EideeHi
+ * Copyright (c) 2020 EideeHi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,20 +22,21 @@
  * SOFTWARE.
  */
 
-package net.eidee.minecraft.exp_bottling.item;
+package net.eidee.minecraft.exp_bottling.core.init;
 
-import net.eidee.minecraft.exp_bottling.constants.RegistryNames;
+import java.util.concurrent.atomic.AtomicInteger;
+import net.eidee.minecraft.exp_bottling.network.Networks;
+import net.eidee.minecraft.exp_bottling.network.message.SetExpToBeBottled;
 
-import net.minecraft.item.Item;
-import net.minecraftforge.registries.ObjectHolder;
-
-public class Items
-{
-    private Items()
-    {
-    }
-
-
-    @ObjectHolder( RegistryNames.BOTTLED_EXP )
-    public static Item BOTTLED_EXP;
+public class NetworkInitializer {
+  public static void registerMessage() {
+    AtomicInteger id = new AtomicInteger(0);
+    Networks.getChannel()
+        .registerMessage(
+            id.getAndIncrement(),
+            SetExpToBeBottled.class,
+            SetExpToBeBottled::encode,
+            SetExpToBeBottled::decode,
+            SetExpToBeBottled::handle);
+  }
 }

@@ -4,7 +4,7 @@
 
   "_comment": "Items",
   "item.exp_bottling.bottled_exp": "瓶装的经验值",
-  "item.exp_bottling.bottled_exp.tooltip.0": "经验值: %,d",
+  "item.exp_bottling.bottled_exp.tooltip.0": "经验值: %s",
 
   "_comment": "Container",
   "container.exp_bottling.exp_bottling_machine": "经验装瓶机",

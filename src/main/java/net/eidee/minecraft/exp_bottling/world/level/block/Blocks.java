@@ -22,20 +22,15 @@
  * SOFTWARE.
  */
 
-package net.eidee.minecraft.exp_bottling.inventory.container;
+package net.eidee.minecraft.exp_bottling.world.level.block;
 
-import net.eidee.minecraft.exp_bottling.constants.RegistryNames;
-
-import net.minecraft.inventory.container.ContainerType;
+import net.eidee.minecraft.exp_bottling.core.constants.Identifies;
+import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.ObjectHolder;
 
-public class ContainerTypes
-{
-    private ContainerTypes()
-    {
-    }
+public class Blocks {
+  private Blocks() {}
 
-    @ObjectHolder( RegistryNames.EXP_BOTTLING_MACHINE )
-    public static ContainerType< ExpBottlingMachineContainer > EXP_BOTTLING_MACHINE;
-
+  @ObjectHolder(Identifies.EXP_BOTTLING_MACHINE)
+  public static Block EXP_BOTTLING_MACHINE;
 }

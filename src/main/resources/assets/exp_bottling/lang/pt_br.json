@@ -4,7 +4,7 @@
 
   "_comment": "Items",
   "item.exp_bottling.bottled_exp": "Engarrafamento de EXP",
-  "item.exp_bottling.bottled_exp.tooltip.0": "Experiência: %,d",
+  "item.exp_bottling.bottled_exp.tooltip.0": "Experiência: %s",
 
   "_comment": "Container",
   "container.exp_bottling.exp_bottling_machine": "Máquina Engarrafadora de EXP",

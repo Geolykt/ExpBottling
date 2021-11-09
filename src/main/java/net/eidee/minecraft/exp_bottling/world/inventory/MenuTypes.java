@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 EideeHi
+ * Copyright (c) 2019 EideeHi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,20 +22,15 @@
  * SOFTWARE.
  */
 
-package net.eidee.minecraft.exp_bottling.init;
+package net.eidee.minecraft.exp_bottling.world.inventory;
 
-import net.eidee.minecraft.exp_bottling.gui.ExpBottlingMachineScreen;
-import net.eidee.minecraft.exp_bottling.inventory.container.ContainerTypes;
+import net.eidee.minecraft.exp_bottling.core.constants.Identifies;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraftforge.registries.ObjectHolder;
 
-import net.minecraft.client.gui.ScreenManager;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+public class MenuTypes {
+  @ObjectHolder(Identifies.EXP_BOTTLING_MACHINE)
+  public static MenuType<ExpBottlingMachineMenu> EXP_BOTTLING_MACHINE;
 
-@OnlyIn( Dist.CLIENT )
-public class ScreenInitializer
-{
-    public static void registerScreen()
-    {
-        ScreenManager.registerFactory( ContainerTypes.EXP_BOTTLING_MACHINE, ExpBottlingMachineScreen::new );
-    }
+  private MenuTypes() {}
 }

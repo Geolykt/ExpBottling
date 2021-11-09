@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2020 EideeHi
+ * Copyright (c) 2019 EideeHi
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,34 +22,15 @@
  * SOFTWARE.
  */
 
-package net.eidee.minecraft.exp_bottling.init;
+package net.eidee.minecraft.exp_bottling.world.item;
 
-import net.eidee.minecraft.exp_bottling.ExpBottlingMod;
-import net.eidee.minecraft.exp_bottling.constants.RegistryNames;
-import net.eidee.minecraft.exp_bottling.item.BottledExpItem;
+import net.eidee.minecraft.exp_bottling.core.constants.Identifies;
+import net.minecraft.world.item.Item;
+import net.minecraftforge.registries.ObjectHolder;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.IForgeRegistry;
+public class Items {
+  private Items() {}
 
-@Mod.EventBusSubscriber( modid = ExpBottlingMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD )
-public class ItemInitializer
-{
-    @SubscribeEvent
-    public static void registerItem( RegistryEvent.Register< Item > event )
-    {
-        IForgeRegistry< Item > registry = event.getRegistry();
-
-        Item item;
-        Item.Properties prop;
-        {
-            prop = new Item.Properties().group( ItemGroup.MISC );
-
-            item = new BottledExpItem( prop ).setRegistryName( RegistryNames.BOTTLED_EXP );
-            registry.register( item );
-        }
-    }
+  @ObjectHolder(Identifies.BOTTLED_EXP)
+  public static Item BOTTLED_EXP;
 }

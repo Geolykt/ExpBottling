@@ -22,23 +22,29 @@
  * SOFTWARE.
  */
 
-package net.eidee.minecraft.exp_bottling.init;
+package net.eidee.minecraft.exp_bottling.core.init;
 
-import java.util.concurrent.atomic.AtomicInteger;
+import net.eidee.minecraft.exp_bottling.ExpBottlingMod;
+import net.eidee.minecraft.exp_bottling.core.constants.Identifies;
+import net.eidee.minecraft.exp_bottling.world.item.BottledExpItem;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.Item;
+import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.IForgeRegistry;
 
-import net.eidee.minecraft.exp_bottling.network.Networks;
-import net.eidee.minecraft.exp_bottling.network.message.SetBottlingExp;
+@Mod.EventBusSubscriber(modid = ExpBottlingMod.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+public class ItemInitializer {
+  @SubscribeEvent
+  public static void registerItem(RegistryEvent.Register<Item> event) {
+    IForgeRegistry<Item> registry = event.getRegistry();
 
-public class NetworkInitializer
-{
-    public static void registerMessage()
-    {
-        AtomicInteger id = new AtomicInteger( 0 );
-        Networks.getChannel()
-                .registerMessage( id.getAndIncrement(),
-                                  SetBottlingExp.class,
-                                  SetBottlingExp::encode,
-                                  SetBottlingExp::decode,
-                                  SetBottlingExp::handle );
-    }
+    Item item;
+    Item.Properties prop;
+
+    prop = new Item.Properties().tab(CreativeModeTab.TAB_MISC);
+    item = new BottledExpItem(prop).setRegistryName(Identifies.BOTTLED_EXP);
+    registry.register(item);
+  }
 }

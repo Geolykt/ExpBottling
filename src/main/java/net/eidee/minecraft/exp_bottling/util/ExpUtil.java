@@ -22,20 +22,28 @@
  * SOFTWARE.
  */
 
-package net.eidee.minecraft.exp_bottling.block;
+package net.eidee.minecraft.exp_bottling.util;
 
-import net.eidee.minecraft.exp_bottling.constants.RegistryNames;
+import java.util.stream.IntStream;
+import net.minecraft.world.entity.player.Player;
 
-import net.minecraft.block.Block;
-import net.minecraftforge.registries.ObjectHolder;
+public class ExpUtil {
+  private ExpUtil() {}
 
-public class Blocks
-{
-    private Blocks()
-    {
+  public static int getExpNeededForLevel(int level) {
+    if (level >= 30) {
+      return 112 + (level - 30) * 9;
+    } else {
+      return level >= 15 ? 37 + (level - 15) * 5 : 7 + level * 2;
     }
+  }
 
-    @ObjectHolder( RegistryNames.EXP_BOTTLING_MACHINE )
-    public static Block EXP_BOTTLING_MACHINE;
+  public static int getExpToReachLevel(int level, float progress) {
+    int sum = IntStream.range(0, level).map(ExpUtil::getExpNeededForLevel).sum();
+    return sum + Math.round(getExpNeededForLevel(level) * progress);
+  }
 
+  public static int getCurrentExp(Player player) {
+    return getExpToReachLevel(player.experienceLevel, player.experienceProgress);
+  }
 }

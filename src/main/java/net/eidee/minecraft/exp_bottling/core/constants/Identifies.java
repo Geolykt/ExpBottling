@@ -22,32 +22,15 @@
  * SOFTWARE.
  */
 
-package net.eidee.minecraft.exp_bottling.network;
+package net.eidee.minecraft.exp_bottling.core.constants;
 
 import static net.eidee.minecraft.exp_bottling.ExpBottlingMod.MOD_ID;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.fmllegacy.network.NetworkRegistry;
-import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
+/** This class defines the identifiers of the blocks and items of the mod. */
+public class Identifies {
+  public static final String EXP_BOTTLING_MACHINE = (MOD_ID + ":exp_bottling_machine");
 
-/** This class is defined channel for the mod. */
-public class Networks {
-  private Networks() {}
+  public static final String BOTTLED_EXP = (MOD_ID + ":bottled_exp");
 
-  private static final String PROTOCOL_VERSION;
-  private static final SimpleChannel CHANNEL;
-
-  static {
-    PROTOCOL_VERSION = "2";
-    CHANNEL =
-        NetworkRegistry.newSimpleChannel(
-            new ResourceLocation(MOD_ID, "exp_bottling"),
-            () -> PROTOCOL_VERSION,
-            PROTOCOL_VERSION::equals,
-            PROTOCOL_VERSION::equals);
-  }
-
-  public static SimpleChannel getChannel() {
-    return CHANNEL;
-  }
+  private Identifies() {}
 }

@@ -4,7 +4,7 @@
 
   "_comment": "Items",
   "item.exp_bottling.bottled_exp": "Erfahrungsfläschchen",
-  "item.exp_bottling.bottled_exp.tooltip.0": "Erfahrung: %,d",
+  "item.exp_bottling.bottled_exp.tooltip.0": "Erfahrung: %s",
 
   "_comment": "Container",
   "container.exp_bottling.exp_bottling_machine": "EP Abfüllmaschine",
