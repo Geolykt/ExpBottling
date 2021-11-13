@@ -59,7 +59,8 @@ public class BlockInitializer {
     Block block;
     Properties properties;
 
-    properties = Properties.of(Material.METAL).requiresCorrectToolForDrops().strength(3.0F);
+    properties =
+        Properties.of(Material.METAL).requiresCorrectToolForDrops().strength(3.0F).noOcclusion();
     block =
         new ExpBottlingMachineBlock(properties).setRegistryName(Identifies.EXP_BOTTLING_MACHINE);
     registry.register(block);
