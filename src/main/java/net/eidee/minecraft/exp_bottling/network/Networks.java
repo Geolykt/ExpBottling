@@ -27,8 +27,8 @@ package net.eidee.minecraft.exp_bottling.network;
 import static net.eidee.minecraft.exp_bottling.ExpBottlingMod.MOD_ID;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.fmllegacy.network.NetworkRegistry;
-import net.minecraftforge.fmllegacy.network.simple.SimpleChannel;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.simple.SimpleChannel;
 
 /** This class is defined channel for the mod. */
 public class Networks {
