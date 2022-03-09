@@ -26,6 +26,9 @@ package net.eidee.minecraft.exp_bottling.network.message;
 
 import java.util.function.Supplier;
 import javax.annotation.ParametersAreNonnullByDefault;
+
+import org.jetbrains.annotations.NotNull;
+
 import net.eidee.minecraft.exp_bottling.world.inventory.ExpBottlingMachineMenu;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.FriendlyByteBuf;
@@ -40,6 +43,7 @@ public record SetExpToBeBottled(int exp) {
     buffer.writeInt(message.exp);
   }
 
+  @NotNull
   public static SetExpToBeBottled decode(FriendlyByteBuf buffer) {
     return new SetExpToBeBottled(buffer.readInt());
   }

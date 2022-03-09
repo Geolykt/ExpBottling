@@ -251,7 +251,7 @@ public class ExpBottlingMachineScreen extends AbstractContainerScreen<ExpBottlin
   public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
     super.mouseClicked(mouseX, mouseY, mouseButton);
     if (!this.ignoreClickEvent) {
-      if (this.getSlotUnderMouse() == null && this.children().stream().noneMatch(child -> child.isMouseOver(mouseX, mouseY))) {
+      if (this.getSlotUnderMouse() == null && this.children().stream().noneMatch(child -> child != null && child.isMouseOver(mouseX, mouseY))) {
         this.expToBeBottled.setFocused(false);
         this.playerExpAfterBottling.setFocused(false);
       }
